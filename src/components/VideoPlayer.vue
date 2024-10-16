@@ -6,26 +6,27 @@
       @player-state-change="onPlayerStateChange"
       @duration-change="duration = $event"
     />
+    <SubtitlesDisplay
+      :subtitles="subtitles"
+      :current-time="currentTime"
+      @seek-to-subtitle="seekToSubtitle"
+    />
     <ControlBar
       :is-playing="isPlaying"
       :current-time="currentTime"
       :duration="duration"
       :is-looping="isLooping"
+      :current-subtitle-text="currentSubtitleText"
       @toggle-play="togglePlay"
       @seek="seek"
       @toggle-loop="toggleLoop"
-    />
-    <SubtitlesDisplay
-      :subtitles="subtitles"
-      :current-time="currentTime"
-      @seek-to-subtitle="seekToSubtitle"
     />
   </div>
 </template>
 
 <script>
 /* global YT */
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { parseSRT } from "../utils/srtParser";
 import subtitlesFile from "!raw-loader!../assets/scripts/subtitles.srt";
 import VideoContainer from "./VideoContainer.vue";
@@ -130,6 +131,13 @@ export default {
       }
     };
 
+    const currentSubtitleText = computed(() => {
+      const currentSubtitle = subtitles.value.find(
+        subtitle => currentTime.value >= subtitle.start && currentTime.value < subtitle.end
+      );
+      return currentSubtitle ? currentSubtitle.text : '';
+    });
+
     watch(isPlaying, (newValue) => {
       if (newValue) {
         const interval = setInterval(() => {
@@ -156,6 +164,7 @@ export default {
       seek,
       seekToSubtitle,
       toggleLoop,
+      currentSubtitleText,
     };
   },
 };
