@@ -1,7 +1,7 @@
 <template>
   <div class="control-bar-container">
     <div class="custom-controls">
-      <button @click="$emit('toggle-play')">
+      <button @click="handleTogglePlay">
         {{ isPlaying ? "暂停" : "播放" }}
       </button>
       <input
@@ -70,6 +70,11 @@ export default {
     const showLoopText = ref(false);
     const currentLoopText = ref('');
 
+    const handleTogglePlay = () => {
+      console.log("Toggle play button clicked");
+      emit('toggle-play');
+    };
+
     const formatTime = (time) => {
       const minutes = Math.floor(time / 60);
       const seconds = Math.floor(time % 60);
@@ -133,7 +138,8 @@ export default {
       showLoopText,
       currentLoopText,
       toggleLoopAndShowText,
-      analyzedText
+      analyzedText,
+      handleTogglePlay
     };
   },
 };

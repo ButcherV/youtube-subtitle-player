@@ -7,7 +7,7 @@
       @duration-change="duration = $event"
     />
     <SubtitlesDisplay
-      :subtitles="subtitles"
+      :subtitles="parsedSubtitles"
       :current-time="currentTime"
       @seek-to-subtitle="seekToSubtitle"
     />
@@ -27,8 +27,6 @@
 <script>
 /* global YT */
 import { ref, watch, computed } from "vue";
-import { parseSRT } from "../utils/srtParser";
-import subtitlesFile from "!raw-loader!../assets/scripts/subtitles.srt";
 import VideoContainer from "./VideoContainer.vue";
 import ControlBar from "./ControlBar.vue";
 import SubtitlesDisplay from "./SubtitlesDisplay.vue";
@@ -45,19 +43,23 @@ export default {
       type: String,
       required: true,
     },
+    subtitles: {
+      type: Array,
+      required: true,
+    },
   },
-  /* eslint-disable no-unused-vars */
   setup(props) {
+    console.log('Received subtitles:', props.subtitles);
     const player = ref(null);
     const isPlaying = ref(false);
     const currentTime = ref(0);
     const duration = ref(0);
-    const subtitles = ref([]);
     const isLooping = ref(false);
     const loopStart = ref(0);
     const loopEnd = ref(0);
 
-    subtitles.value = parseSRT(subtitlesFile);
+    // 解析字幕
+    const parsedSubtitles = computed(() => props.subtitles);
 
     const onPlayerReady = (playerInstance) => {
       player.value = playerInstance;
@@ -101,7 +103,7 @@ export default {
     };
 
     const startLooping = () => {
-      const currentSubtitle = subtitles.value.find(
+      const currentSubtitle = parsedSubtitles.value.find(
         (subtitle) =>
           currentTime.value >= subtitle.start &&
           currentTime.value < subtitle.end
@@ -132,7 +134,7 @@ export default {
     };
 
     const currentSubtitleText = computed(() => {
-      const currentSubtitle = subtitles.value.find(
+      const currentSubtitle = parsedSubtitles.value.find(
         subtitle => currentTime.value >= subtitle.start && currentTime.value < subtitle.end
       );
       return currentSubtitle ? currentSubtitle.text : '';
@@ -156,7 +158,7 @@ export default {
       isPlaying,
       currentTime,
       duration,
-      subtitles,
+      parsedSubtitles,
       isLooping,
       onPlayerReady,
       onPlayerStateChange,

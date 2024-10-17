@@ -1,7 +1,10 @@
 <template>
   <div id="app">
     <h1>YouTube Subtitle Player</h1>
+    <input v-model="videoUrl" placeholder="输入 YouTube 视频链接" @keyup.enter="extractSubtitles">
+    <button @click="extractSubtitles">提取字幕</button>
     <VideoPlayer
+      v-if="subtitles.length"
       :videoUrl="videoUrl"
       :subtitles="subtitles"
       @timeupdate="handleTimeUpdate"
@@ -10,9 +13,13 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import axios from 'axios'
 import VideoPlayer from './components/VideoPlayer.vue'
+import { parseSRT } from './utils/srtParser';
+
+// 基础 URL
+const API_BASE_URL = 'http://localhost:3000'
 
 export default {
   name: 'App',
@@ -20,41 +27,39 @@ export default {
     VideoPlayer
   },
   setup() {
-    const videoUrl = ref('https://www.youtube.com/watch?v=Jd10x8LiuBc') // 替换为您的视频链接
+    const videoUrl = ref('')
     const subtitles = ref([])
 
-    const parseSRT = (srtContent) => {
-      const subtitles = []
-      const subtitleBlocks = srtContent.trim().split('\n\n')
-      
-      subtitleBlocks.forEach(block => {
-        const lines = block.split('\n')
-        const timeLine = lines[1].split(' --> ')
-        
-        subtitles.push({
-          start: timeToSeconds(timeLine[0]),
-          end: timeToSeconds(timeLine[1]),
-          text: lines.slice(2).join(' ')
-        })
-      })
-
-      return subtitles
-    }
-
-    const timeToSeconds = (timeString) => {
-      const [hours, minutes, seconds] = timeString.split(':')
-      return Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds.replace(',', '.'))
-    }
-
-    onMounted(async () => {
-      try {
-        // 假设您的字幕文件存储在公共文件夹中
-        const response = await axios.get('/subtitles.srt')
-        subtitles.value = parseSRT(response.data)
-      } catch (error) {
-        console.error('Error loading subtitles:', error)
+    const extractSubtitles = async () => {
+      if (!videoUrl.value) {
+        alert('请输入 YouTube 视频链接')
+        return
       }
-    })
+
+      try {
+        console.log('正在发送请求，URL:', videoUrl.value)
+        const response = await axios.post(`${API_BASE_URL}/extract-subtitles`, {
+          videoUrl: videoUrl.value
+        })
+        console.log('收到响应:', response)
+
+        if (response.data && response.data.subtitles) {
+          console.log('接收到的字幕数据:', response.data.subtitles)
+          subtitles.value = parseSRT(response.data.subtitles)
+          console.log('Parsed subtitles:', subtitles.value)
+          localStorage.setItem(videoUrl.value, JSON.stringify(subtitles.value))
+        } else {
+          throw new Error('无效的字幕数据')
+        }
+      } catch (error) {
+        console.error('提取字幕时出错:', error)
+        if (error.response) {
+          console.error('响应数据:', error.response.data)
+          console.error('响应状态:', error.response.status)
+        }
+        alert('提取字幕时出错，请检查视频链接或稍后重试')
+      }
+    }
 
     const handleTimeUpdate = () => {
       // 可以在这里添加额外的逻辑，如果需要的话
@@ -63,6 +68,7 @@ export default {
     return {
       videoUrl,
       subtitles,
+      extractSubtitles,
       handleTimeUpdate
     }
   }
@@ -77,5 +83,15 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+input {
+  margin-right: 10px;
+  padding: 5px;
+  width: 300px;
+}
+
+button {
+  padding: 5px 10px;
 }
 </style>
