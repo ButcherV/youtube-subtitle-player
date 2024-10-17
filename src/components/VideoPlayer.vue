@@ -137,7 +137,7 @@ export default {
       const currentSubtitle = parsedSubtitles.value.find(
         subtitle => currentTime.value >= subtitle.start && currentTime.value < subtitle.end
       );
-      return currentSubtitle ? currentSubtitle.text : '';
+      return currentSubtitle ? currentSubtitle.originText : '';
     });
 
     watch(isPlaying, (newValue) => {

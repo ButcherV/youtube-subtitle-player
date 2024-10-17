@@ -30,22 +30,20 @@
     {
       start: 0.485,
       end: 5.297,
-      text: "MR. TRASK: I'm going to recommend to the disciplinary committee"
+      originText: "MR. TRASK: I'm going to recommend to the disciplinary committee"
+      translatedText: "" // 初始化为空字符串，后续会填充翻译
     },
     {
       start: 5.297,
       end: 7.878,
-      text: "that you be expelled, Mr. Simms."
+      originText: "that you be expelled, Mr. Simms."
+      translatedText: ""
     },
     {
       start: 7.878,
       end: 11.666,
-      text: "You are a cover-up artist and you are a liar."
-    },
-    {
-      start: 11.666,
-      end: 14.975,
-      text: "But not a snitch!"
+      originText: "You are a cover-up artist and you are a liar."
+      translatedText: ""
     },
     // ... 
   ]
@@ -61,7 +59,7 @@ export function parseSRT(subtitlesArray) {
       return {
         start: timeToSeconds(subtitle.start),
         end: timeToSeconds(subtitle.end),
-        text: subtitle.text,
+        originText: subtitle.originText,
       };
     });
   }
@@ -78,12 +76,16 @@ export function parseSRT(subtitlesArray) {
         subtitles.push({
           start: timeToSeconds(timeCode[0]),
           end: timeToSeconds(timeCode[1]),
-          text: lines.slice(2).join(" "),
+          originText: lines.slice(2).join(" "),
         });
       }
     });
 
-    return subtitles;
+    return subtitles.map(subtitle => ({
+      ...subtitle,
+      originText: subtitle.originText,
+      translatedText: '' // 初始化为空字符串，后续会填充翻译
+    }));
   }
 
   // 如果输入既不是数组也不是字符串，返回空数组

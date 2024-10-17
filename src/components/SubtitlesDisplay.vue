@@ -6,7 +6,7 @@
       :class="{ subtitle: true, active: isSubtitleActive(subtitle) }"
       @click="$emit('seek-to-subtitle', subtitle)"
     >
-      {{ subtitle.text }}
+      {{ subtitle.originText }}
     </div>
   </div>
 </template>
