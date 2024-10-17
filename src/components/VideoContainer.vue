@@ -14,7 +14,7 @@
 
 <script>
 /* global YT */
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 
 export default {
   name: "VideoContainer",
@@ -33,6 +33,7 @@ export default {
 
     // 地址栏链接的格式: https://www.youtube.com/watch?v=xxxx
     // 分享链接的格式: https://youtu.be/xxxx?xxx=xxxx
+    // 需要 embedUrl 分别处理。
     const embedUrl = computed(() => {
       let videoId = '';
       const url = props.videoUrl;
@@ -55,14 +56,12 @@ export default {
       return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&controls=0&showinfo=0&rel=0&cc_load_policy=0&disablekb=1&hl=en&cc_lang_pref=en&modestbranding=1&playsinline=1`;
     });
 
-    console.log('embedUrl', embedUrl.value);
-
     const onPlayerReady = (event) => {
       isPlayerReady.value = true;
       emit("player-ready", event.target);
       emit("duration-change", event.target.getDuration());
-      console.log('event.target.getDuration()', event.target.getDuration());
 
+      // 试图禁用自带字幕。目前并不成功。
       event.target.unloadModule("captions");
       event.target.unloadModule("cc");
 
@@ -70,6 +69,8 @@ export default {
         event.target.setOption("captions", "track", {});
       }
 
+      // 并短暂播放然后暂停视频。
+      // 是为了遮盖播放键。
       event.target.playVideo();
       setTimeout(() => {
         event.target.pauseVideo();
@@ -79,18 +80,6 @@ export default {
     const onPlayerStateChange = (event) => {
       console.log("Player state change in VideoContainer:", event.data);
       emit("player-state-change", event);
-    };
-
-    const disableCaptions = () => {
-      if (player.value && player.value.getOptions) {
-        const options = player.value.getOptions();
-        if (options.includes("captions")) {
-          player.value.unloadModule("captions");
-        }
-        if (options.includes("cc")) {
-          player.value.unloadModule("cc");
-        }
-      }
     };
 
     onMounted(() => {
@@ -119,16 +108,6 @@ export default {
           },
         });
       };
-
-      const captionsInterval = setInterval(() => {
-        if (isPlayerReady.value) {
-          disableCaptions();
-        }
-      }, 1000);
-
-      onUnmounted(() => {
-        clearInterval(captionsInterval);
-      });
     });
 
     return {
