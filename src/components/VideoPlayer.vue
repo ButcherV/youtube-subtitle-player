@@ -1,5 +1,6 @@
 <template>
   <div class="video-player">
+    <div class="video-title">{{ meta.videoTitle }}</div>
     <VideoContainer
       :video-url="videoUrl"
       @player-ready="onPlayerReady"
@@ -45,6 +46,10 @@ export default {
     },
     subtitles: {
       type: Array,
+      required: true,
+    },
+    meta: {
+      type: Object,
       required: true,
     },
   },

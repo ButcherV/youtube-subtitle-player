@@ -7,6 +7,7 @@
       v-if="subtitles.length"
       :videoUrl="videoUrl"
       :subtitles="subtitles"
+      :meta="meta"
       @timeupdate="handleTimeUpdate"
     />
   </div>
@@ -31,6 +32,7 @@ export default {
   setup() {
     const videoUrl = ref('')
     const subtitles = ref([])
+    const meta = ref({})
     const extractSubtitles = async () => {
       if (!videoUrl.value) {
         alert('请输入 YouTube 视频链接')
@@ -44,18 +46,22 @@ export default {
         return
       }
 
-      // 首先检查 localStorage
-      const storedSubtitles = localStorage.getItem(videoId)
-      if (storedSubtitles) {
-        try {
-          subtitles.value = JSON.parse(storedSubtitles)
-          console.log('从 localStorage 加载字幕数据')
-          return
-        } catch (error) {
-          console.error('解析存储的字幕数据时出错:', error)
-          // 如果解析失败，继续从服务器获取
+    // 首先检查 localStorage
+    const storedData = localStorage.getItem(videoId);
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        if (parsedData.subtitles) {
+          subtitles.value = parsedData.subtitles;
+          meta.value = parsedData.metadata;
+          console.log('从 localStorage 加载字幕数据');
+          return;
         }
+      } catch (error) {
+        console.error('解析存储的字幕数据时出错:', error);
+        // 如果解析失败，继续从服务器获取
       }
+    }
 
       // 如果没有缓存，显示确认对话框
       const userConfirmed = await showConfirmDialog()
@@ -81,9 +87,9 @@ export default {
 
           // srt 数据格式化功能、翻译功能都已迁移至后端
           subtitles.value = response.data.subtitles
-          
+          meta.value = response.data.metadata
           console.log('解析和翻译后的字幕:', subtitles.value)
-          localStorage.setItem(videoId, JSON.stringify(subtitles.value))
+          localStorage.setItem(videoId, JSON.stringify(response.data))
         } else {
           throw new Error('无效的字幕数据')
         }
@@ -111,6 +117,7 @@ export default {
     return {
       videoUrl,
       subtitles,
+      meta,
       extractSubtitles,
       handleTimeUpdate
     }
