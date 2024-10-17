@@ -15,6 +15,7 @@
 <script>
 /* global YT */
 import { ref, computed, onMounted } from "vue";
+import { extractVideoId, generateEmbedUrl } from '../utils/youtubeUtils';
 
 export default {
   name: "VideoContainer",
@@ -30,32 +31,11 @@ export default {
     const player = ref(null);
     const isPlayerReady = ref(false);
 
-
-    // 地址栏链接的格式: https://www.youtube.com/watch?v=xxxx
-    // 分享链接的格式: https://youtu.be/xxxx?xxx=xxxx
-    // 需要 embedUrl 分别处理。
     const embedUrl = computed(() => {
-      let videoId = '';
-      const url = props.videoUrl;
-
-      // 不仅提取了视频 ID，还通过 split('?')[0] 移除了 ID 后可能存在的任何查询参数。
-      if (url.includes('youtu.be')) {
-        videoId = url.split('youtu.be/')[1].split('?')[0];
-      } 
-      
-      else if (url.includes('youtube.com')) {
-        const urlParams = new URLSearchParams(url.split('?')[1]);
-        videoId = urlParams.get('v');
-      }
-      
-      if (!videoId) {
-        console.error('无法提取视频 ID:', url);
-        return '';
-      }
-      
-      return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&controls=0&showinfo=0&rel=0&cc_load_policy=0&disablekb=1&hl=en&cc_lang_pref=en&modestbranding=1&playsinline=1`;
+      const videoId = extractVideoId(props.videoUrl);
+      return videoId ? generateEmbedUrl(videoId) : '';
     });
-
+    
     const onPlayerReady = (event) => {
       isPlayerReady.value = true;
       emit("player-ready", event.target);
