@@ -18,6 +18,7 @@ import axios from 'axios'
 import VideoPlayer from './components/VideoPlayer.vue'
 import { parseSRT } from './utils/srtParser';
 import { extractVideoId } from './utils/youtubeUtils';
+import { translateSubtitles } from './services/translationService';
 
 // 基础 URL
 const API_BASE_URL = 'http://localhost:3000'
@@ -71,8 +72,12 @@ export default {
 
         if (response.data && response.data.subtitles) {
           console.log('接收到的字幕数据:', response.data.subtitles)
-          subtitles.value = parseSRT(response.data.subtitles)
-          console.log('解析后的字幕:', subtitles.value)
+          const parsedSubtitles = parseSRT(response.data.subtitles)
+
+          // 调用翻译服务
+          subtitles.value = await translateSubtitles(parsedSubtitles)
+          
+          console.log('解析和翻译后的字幕:', subtitles.value)
           localStorage.setItem(videoId, JSON.stringify(subtitles.value))
         } else {
           throw new Error('无效的字幕数据')
