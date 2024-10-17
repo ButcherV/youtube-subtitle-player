@@ -16,9 +16,9 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import VideoPlayer from './components/VideoPlayer.vue'
-import { parseSRT } from './utils/srtParser';
+// import { parseSRT } from './utils/srtParser';
 import { extractVideoId } from './utils/youtubeUtils';
-import { translateSubtitles } from './services/translationService';
+// import { translateSubtitles } from './services/translationService';
 
 // 基础 URL
 const API_BASE_URL = 'http://localhost:3000'
@@ -38,6 +38,7 @@ export default {
       }
 
       const videoId = extractVideoId(videoUrl.value);
+
       if (!videoId) {
         alert('无效的 YouTube 链接')
         return
@@ -65,17 +66,21 @@ export default {
 
       try {
         console.log('正在从服务器获取字幕，URL:', videoUrl.value)
-        const response = await axios.post(`${API_BASE_URL}/extract-subtitles`, {
+        const response = await axios.post(`${API_BASE_URL}/extract-and-translate-subtitles`, {
           videoUrl: videoUrl.value
         })
         console.log('收到响应:', response)
 
         if (response.data && response.data.subtitles) {
           console.log('接收到的字幕数据:', response.data.subtitles)
-          const parsedSubtitles = parseSRT(response.data.subtitles)
+          // const parsedSubtitles = parseSRT(response.data.subtitles)
+          // const parsedSubtitles = response.data.subtitles
 
           // 调用翻译服务
-          subtitles.value = await translateSubtitles(parsedSubtitles)
+          // subtitles.value = await translateSubtitles(parsedSubtitles)
+
+          // srt 数据格式化功能、翻译功能都已迁移至后端
+          subtitles.value = response.data.subtitles
           
           console.log('解析和翻译后的字幕:', subtitles.value)
           localStorage.setItem(videoId, JSON.stringify(subtitles.value))

@@ -39,3 +39,5 @@ export function generateEmbedUrl(videoId, options = {}) {
 
   return `https://www.youtube.com/embed/${videoId}?${params}`;
 }
+
+
