@@ -17,10 +17,16 @@
       :current-time="currentTime"
       :duration="duration"
       :is-looping="isLooping"
-      :current-subtitle-text="currentSubtitleText"
       @toggle-play="togglePlay"
       @seek="seek"
       @toggle-loop="toggleLoop"
+    />
+    <SubtitleAnalysisPopup
+      :is-active="isLooping"
+      :video-id="videoId"
+      :current-subtitle-id="currentSubtitleId"
+      :current-subtitle-text="currentSubtitleText"
+      @close="stopLooping"
     />
   </div>
 </template>
@@ -31,6 +37,7 @@ import { ref, watch, computed } from "vue";
 import VideoContainer from "./VideoContainer.vue";
 import ControlBar from "./ControlBar.vue";
 import SubtitlesDisplay from "./SubtitlesDisplay.vue";
+import SubtitleAnalysisPopup from './SubtitleAnalysisPopup.vue';
 
 export default {
   name: "VideoPlayer",
@@ -38,6 +45,7 @@ export default {
     VideoContainer,
     ControlBar,
     SubtitlesDisplay,
+    SubtitleAnalysisPopup,
   },
   props: {
     videoUrl: {
@@ -50,6 +58,10 @@ export default {
     },
     meta: {
       type: Object,
+      required: true,
+    },
+    videoId: {
+      type: String,
       required: true,
     },
   },
@@ -138,11 +150,18 @@ export default {
       }
     };
 
-    const currentSubtitleText = computed(() => {
-      const currentSubtitle = parsedSubtitles.value.find(
+    const currentSubtitle = computed(() => {
+      return parsedSubtitles.value.find(
         subtitle => currentTime.value >= subtitle.start && currentTime.value < subtitle.end
       );
-      return currentSubtitle ? currentSubtitle.originText : '';
+    });
+
+    const currentSubtitleText = computed(() => {
+      return currentSubtitle.value ? currentSubtitle.value.originText : '';
+    });
+
+    const currentSubtitleId = computed(() => {
+      return currentSubtitle.value ? currentSubtitle.value.id : null;
     });
 
     watch(isPlaying, (newValue) => {
@@ -172,6 +191,8 @@ export default {
       seekToSubtitle,
       toggleLoop,
       currentSubtitleText,
+      currentSubtitleId,
+      stopLooping
     };
   },
 };

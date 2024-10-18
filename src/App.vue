@@ -6,6 +6,7 @@
     <VideoPlayer
       v-if="subtitles.length"
       :videoUrl="videoUrl"
+      :videoId="currentVideoId"
       :subtitles="subtitles"
       :meta="meta"
       @timeupdate="handleTimeUpdate"
@@ -33,6 +34,8 @@ export default {
     const videoUrl = ref('')
     const subtitles = ref([])
     const meta = ref({})
+    const currentVideoId = ref('')
+    
     const extractSubtitles = async () => {
       if (!videoUrl.value) {
         alert('请输入 YouTube 视频链接')
@@ -40,6 +43,7 @@ export default {
       }
 
       const videoId = extractVideoId(videoUrl.value);
+      currentVideoId.value = extractVideoId(videoUrl.value);
 
       if (!videoId) {
         alert('无效的 YouTube 链接')
@@ -119,7 +123,8 @@ export default {
       subtitles,
       meta,
       extractSubtitles,
-      handleTimeUpdate
+      handleTimeUpdate,
+      currentVideoId
     }
   }
 }
