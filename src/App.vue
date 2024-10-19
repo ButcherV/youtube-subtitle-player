@@ -11,6 +11,7 @@
       :meta="meta"
       @timeupdate="handleTimeUpdate"
     />
+    <BottomNav />
   </div>
 </template>
 
@@ -20,6 +21,7 @@ import axios from 'axios'
 import VideoPlayer from './components/VideoPlayer.vue'
 // import { parseSRT } from './utils/srtParser';
 import { extractVideoId } from './utils/youtubeUtils';
+import BottomNav from './components/BottomNav.vue'
 // import { translateSubtitles } from './services/translationService';
 
 // 基础 URL
@@ -28,7 +30,8 @@ const API_BASE_URL = 'http://localhost:3000'
 export default {
   name: 'App',
   components: {
-    VideoPlayer
+    VideoPlayer,
+    BottomNav
   },
   setup() {
     const videoUrl = ref('')

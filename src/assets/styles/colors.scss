@@ -1,0 +1,22 @@
+/* src/assets/styles/variables.scss */
+:root {
+  --accent-color: #1fa8f5;
+  --accent-color-fg: #fefefe;
+  --backdrop-color: #89d4fe;
+  --app-content-background-color: #c0d8ec;
+  --inset-shadow: rgba(7, 43, 74, 0.3);
+  --outset-shadow: rgba(223, 240, 255, 0.25);
+  --clay-box-shadow: rgba(7, 43, 74, 0.3);
+  --clay-background-color: #c0d8ec;
+  --clay-fg-color: #444;
+}
+
+$accent-color: var(--accent-color);
+$accent-color-fg: var(--accent-color-fg);
+$backdrop-color: var(--backdrop-color);
+$app-content-background-color: var(--app-content-background-color);
+$inset-shadow: var(--inset-shadow);
+$outset-shadow: var(--outset-shadow);
+$clay-box-shadow: var(--clay-box-shadow);
+$clay-background-color: var(--clay-background-color);
+$clay-fg-color: var(--clay-fg-color);
