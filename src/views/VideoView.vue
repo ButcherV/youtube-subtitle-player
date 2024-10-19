@@ -3,10 +3,9 @@
     <input
       v-model="videoUrl"
       placeholder="输入 YouTube 视频链接"
-      @keyup.enter="extractSubtitles"
     />
     <button @click="extractSubtitles">提取字幕</button>
-    <CarouselCard :items="carouselItems" />
+    <CarouselCard :items="carouselItems" @cardClick="handleCardClick"/>
     <VideoPlayer
       v-if="subtitles.length"
       :videoUrl="videoUrl"
@@ -41,12 +40,13 @@ export default {
     const meta = ref({});
     const currentVideoId = ref("");
 
-    const carouselItems = [
-      { title: 'Card 1', description: 'This is the first card' },
-      { title: 'Card 2', description: 'This is the second card' },
-      { title: 'Card 3', description: 'This is the 3 card' },
-      { title: 'Card 4', description: 'This is the 4 card' },
-      { title: 'Card 5', description: 'This is the 5 card' },
+    const carouselItems = ref([
+      { title: 'Video 1', description: 'Description 1', videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc' },
+      { title: 'Video 2', description: 'Description 2', videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc' },
+      { title: 'Video 3', description: 'Description 3', videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc' },
+      { title: 'Video 4', description: 'Description 4', videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc' },
+      { title: 'Video 5', description: 'Description 5', videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc' },
+    ]);
       // { title: 'Card 6', description: 'This is the 6 card' },
       // { title: 'Card 7', description: 'This is the 7 card' },
       // { title: 'Card 8', description: 'This is the 8 card' },
@@ -55,16 +55,22 @@ export default {
       // { title: 'Card 11', description: 'This is the 11 card' },
       // { title: 'Card 12', description: 'This is the 12 card' },
       // { title: 'Card 13', description: 'This is the 13 card' },
-    ];
+    // ];
 
-    const extractSubtitles = async () => {
-      if (!videoUrl.value) {
-        alert("请输入 YouTube 视频链接");
+    const handleCardClick = (url) => {
+      videoUrl.value = url;
+      extractSubtitles(url);
+    };
+
+    const extractSubtitles = async (url) => {
+      const targetUrl = url || videoUrl.value;
+      if (!targetUrl) {
+        alert("请输入 YouTube 视频链接或选择一个预设视频");
         return;
       }
 
-      const videoId = extractVideoId(videoUrl.value);
-      currentVideoId.value = extractVideoId(videoUrl.value);
+      const videoId = extractVideoId(targetUrl);
+      currentVideoId.value = videoId;
 
       if (!videoId) {
         alert("无效的 YouTube 链接");
@@ -149,7 +155,8 @@ export default {
       extractSubtitles,
       handleTimeUpdate,
       currentVideoId,
-      carouselItems
+      carouselItems,
+      handleCardClick
     };
   },
 };

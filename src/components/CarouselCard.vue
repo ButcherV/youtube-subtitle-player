@@ -12,6 +12,7 @@
         class="carousel-item"
         :class="{ active: index === currentIndex }"
         :style="getItemStyle(index)"
+        @click="$emit('cardClick', item.videoUrl)"
       >
         <div class="card">
           <h3>{{ item.title }}</h3>
@@ -33,6 +34,7 @@ export default {
       required: true,
     },
   },
+  emits: ['cardClick'],
   setup(props) {
     const currentIndex = ref(0);
     const container = ref(null);
