@@ -12,6 +12,7 @@
     "compromise": "^14.14.2",
     "core-js": "^3.8.3",
     "vue": "^3.2.13",
+    "vue-router": "^4.4.5",
     "ytdl-core-browser": "^1.0.0"
   },
   "devDependencies": {

@@ -1,71 +1,91 @@
 <template>
-  <div class="container stage">
-    <div class="container">
-      <div class="tabbar tab-style1" :class="activeTabStyle">
-        <ul class="flex-center">
-          <li
-            v-for="tab in tabs"
-            :key="tab.name"
-            :class="[tab.name, { active: activeTab === tab.name }]"
-            :data-where="tab.name"
-            @click="setActiveTab(tab.name)"
-          >
-            <span class="material-icons-outlined">{{ tab.icon }}</span>
-          </li>
-          <li class="follow">&nbsp;</li>
-        </ul>
-      </div>
-    </div>
-  </div>
+  <nav class="tabbar tab-style bottom-nav" :class="activeTabStyle">
+    <ul class="flex-center">
+      <li
+        v-for="tab in tabs"
+        :key="tab.name"
+        :class="[tab.name, { active: activeTab === tab.name }]"
+        :data-where="tab.name"
+        @click="setActiveTab(tab.name)"
+        :ref="el => { if (el) tabRefs[tab.name] = el }"
+      >
+        <router-link :to="tab.route">
+          <span class="material-icons-outlined">{{ tab.icon }}</span>
+        </router-link>
+      </li>
+      <li class="follow" ref="follow">&nbsp;</li>
+    </ul>
+  </nav>
 </template>
 
 <script>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, reactive, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 
 export default {
   name: "BottomNav",
   setup() {
+    const router = useRouter();
+    const route = useRoute();
     const tabs = [
-      { name: "home", icon: "home" },
-      { name: "products", icon: "shopping_bag" },
-      { name: "services", icon: "plumbing" },
-      { name: "about", icon: "business" },
-      { name: "help", icon: "help_outline" },
+      { name: "video", icon: "play_circle", route: "/video" },
+      { name: "words", icon: "book", route: "/words" },
+      { name: "settings", icon: "settings", route: "/settings" },
     ];
 
-    const activeTab = ref("home");
+    const activeTab = ref(tabs.find(tab => tab.route === route.path)?.name || "video");
+    const follow = ref(null);
+    const tabRefs = reactive({});
 
     const activeTabStyle = computed(() => `${activeTab.value}-style`);
 
     const setActiveTab = (tabName) => {
       activeTab.value = tabName;
+      router.push(tabs.find((tab) => tab.name === tabName).route);
+      updateFollowPosition();
     };
+
+    const updateFollowPosition = () => {
+      if (follow.value && tabRefs[activeTab.value]) {
+        const activeTabElement = tabRefs[activeTab.value];
+        const navElement = activeTabElement.closest('.bottom-nav');
+        const leftOffset = activeTabElement.offsetLeft - navElement.offsetLeft;
+        const FOLLOW_BORDER_WIDTH = 10; // px
+        const adjustedLeftOffset = leftOffset - FOLLOW_BORDER_WIDTH;
+        follow.value.style.left = `${adjustedLeftOffset}px`;
+      }
+    };
+
+    onMounted(() => {
+      updateFollowPosition();
+      window.addEventListener('resize', updateFollowPosition);
+    });
+
+    // 监听路由变化
+    // 以防出现使用浏览器的后退/前进按钮时，因为这些操作不会触发 Vue 组件的重新渲染。
+    // 导致页面渲染了，但是底部导航没有更新的情况。
+    watch(() => route.path, (newPath) => {
+      const newActiveTab = tabs.find(tab => tab.route === newPath)?.name;
+      if (newActiveTab && newActiveTab !== activeTab.value) {
+        activeTab.value = newActiveTab;
+        updateFollowPosition();
+      }
+    });
 
     return {
       tabs,
       activeTab,
       activeTabStyle,
       setActiveTab,
+      follow,
+      tabRefs,
     };
   },
 };
 </script>
-
 <style lang="scss" scoped>
 @import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons+Outlined");
-
-// :root {
-//   --accent-color: #1fa8f5;
-//   --accent-color-fg: #fefefe;
-//   --backdrop-color: #89d4fe;
-//   --app-content-background-color: #c0d8ec;
-//   --inset-shadow: rgba(7, 43, 74, 0.3);
-//   --outset-shadow: rgba(223, 240, 255, 0.25);
-//   --clay-box-shadow: rgba(7, 43, 74, 0.3);
-//   --clay-background-color: #c0d8ec;
-//   --clay-fg-color: #444;
-// }
 
 body {
   background-color: var(--backdrop-color);
@@ -79,19 +99,7 @@ body {
   align-items: center;
 }
 
-.container {
-  padding: 1rem 1rem 1.5rem;
-}
-
-// start here
-
-.stage {
-  max-width: 400px;
-  width: 400px;
-  margin: 1rem auto 2rem;
-}
-
-.home {
+.video {
   &.active {
     color: var(--accent-color);
   }
@@ -101,7 +109,7 @@ body {
   }
 }
 
-.products {
+.words {
   &.active {
     --outset-shadow: rgba(247, 167, 103, 0.45);
     --inset-shadow: rgba(149, 62, 8, 0.45);
@@ -117,39 +125,7 @@ body {
   }
 }
 
-.services {
-  &.active {
-    --outset-shadow: rgba(255, 159, 40, 0.45);
-    --inset-shadow: rgba(88, 54, 13, 0.45);
-    --clay-box-shadow: rgba(88, 54, 13, 0.4);
-    --clay-background-color: #ed9426;
-    --clay-fg-color: #f1f2f3;
-
-    color: #cf5c0f;
-  }
-
-  &-style {
-    --app-content-background-color: #ed9426;
-  }
-}
-
-.about {
-  &.active {
-    --outset-shadow: rgba(93, 255, 85, 0.45);
-    --inset-shadow: rgba(28, 78, 26, 0.45);
-    --clay-box-shadow: rgba(28, 78, 26, 0.4);
-    --clay-background-color: #4dd146;
-    --clay-fg-color: #f1f2f3;
-
-    color: #4dd146;
-  }
-
-  &-style {
-    --app-content-background-color: #4dd146;
-  }
-}
-
-.help {
+.settings {
   &.active {
     --outset-shadow: rgba(230, 230, 230, 0.45);
     --inset-shadow: rgba(81, 81, 81, 0.45);
@@ -167,14 +143,14 @@ body {
 
 .tabbar {
   background-color: var(--app-content-background-color);
-  border-bottom-left-radius: 1rem;
-  border-bottom-right-radius: 1rem;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  height: 120px;
+  // border-bottom-left-radius: 1rem;
+  // border-bottom-right-radius: 1rem;
+  // box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  // background-color: transparent;
+  height: 100px;
   display: flex;
   flex-direction: column;
   box-sizing: content-box;
-  position: relative;
   overflow: hidden;
   transition: background-color 0.4s;
 
@@ -214,9 +190,9 @@ body {
   }
 }
 
-.tab-style1 {
+.tab-style {
   ul {
-    justify-content: center;
+    justify-content: space-around;
   }
 
   li {
@@ -237,9 +213,11 @@ body {
       width: 60px;
       height: 60px;
       border: 10px solid var(--app-content-background-color);
-      background-color: var(--app-content-background-color);
+      // background-color: var(--app-content-background-color);
+      // border: 10px solid transparent;
+      background-color: transparent;
       top: -3rem;
-      transition: left 0.4s ease-in, background-color 0.4s, border-color 0.4s;
+      transition: left 0.2s ease-in, background-color 0.4s, border-color 0.4s;
 
       &:before,
       &:after {
@@ -265,26 +243,6 @@ body {
         border-top-right-radius: 100%;
       }
     }
-
-    &:nth-child(1).active ~ .follow {
-      left: 12px;
-    }
-
-    &:nth-child(2).active ~ .follow {
-      left: 75px;
-    }
-
-    &:nth-child(3).active ~ .follow {
-      left: 140px;
-    }
-
-    &:nth-child(4).active ~ .follow {
-      left: 205px;
-    }
-
-    &:nth-child(5).active ~ .follow {
-      left: 270px;
-    }
   }
 
   .active {
@@ -297,16 +255,16 @@ body {
   }
 }
 
-.site-url-container {
-  padding: 1rem;
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: rgba(#fff, 0.5);
-  padding: 0.5rem 0.8rem;
+a {
+  text-decoration: none;
+  color: inherit;
 }
 
-.tabbar li {
-  outline: none;
+.bottom-nav {
+  // position: fixed;
+  // bottom: 0;
+  // left: 0;
+  // right: 0;
+  // z-index: 1000; /* 确保导航栏在其他内容之上 */
 }
 </style>
