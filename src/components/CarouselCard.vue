@@ -15,8 +15,12 @@
         @click="$emit('cardClick', item.videoUrl)"
       >
         <div class="card">
-          <h3>{{ item.title }}</h3>
-          <p>{{ item.description }}</p>
+          <img class="card-cover-address" :src="item.coverAddress" alt="Cover" />
+          <div v-if="item.videoPlatform" class="card-platform-icon" :class="item.videoPlatform"></div>
+          <div>
+            <p class="card-duration">{{ item.duration }}</p>
+            <h3 class="card-title">{{ item.title }}</h3>
+          </div>
         </div>
       </div>
     </div>
@@ -87,7 +91,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .carousel-container {
   width: 100%;
   overflow: hidden;
@@ -109,11 +113,73 @@ export default {
 
 .card {
   width: 260px;
-  height: 160px;
+  height: 190px;
   background-color: #fff;
-  border-radius: 10px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+.card-platform-icon {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  // background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  background-size: contain;
+  background-repeat: no-repeat;
+  align-items: center;
+  justify-content: center;
+
+  &.youtube {
+    background-image: url('../assets/images/logo_youtube.png');
+  }
+
+  &.bilibili::before {
+    content: "B";
+    color: #00a1d6;
+    font-size: 14px;
+    font-weight: bold;
+  }
+}
+
+
+.card-title {
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: bold;
+  text-align: left;
+  padding-top: 4px;
+
+  /* 超过两行打点 */
+  max-height: 2.4em; /* 2 行的高度 (2 * 1.2) */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* 限制在2行 */
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  margin: 0; /* 移除默认的 margin */
+}
+
+.card-duration {
+  font-size: 12px;
+  color: gray;
+  font-weight: bold;
+  text-align: left;
+}
+
+.card-cover-address {
+  border-radius: 8px;
+  width: 100%;
+  height: 70%;
+  object-fit: cover;
 }
 
 .active .card {

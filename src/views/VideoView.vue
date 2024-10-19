@@ -1,18 +1,29 @@
 <template>
   <div>
-    <input
-      v-model="videoUrl"
-      placeholder="输入 YouTube 视频链接"
-    />
-    <button @click="extractSubtitles">提取字幕</button>
-    <CarouselCard :items="carouselItems" @cardClick="handleCardClick"/>
+    <div v-if="!showVideoPlayer">
+      <div class="input-card">
+        <div>
+          <p>Hi, xiaowei</p>
+          <p>或选择预设视频</p>
+        </div>
+        <div>
+          <input
+            v-model="userInputUrl"
+            placeholder="输入 YouTube 视频链接"
+          />
+          <button @click="extractSubtitles(userInputUrl)">+</button>
+        </div>
+      </div>
+      <CarouselCard :items="carouselItems" @cardClick="handleCardClick"/>
+    </div>
     <VideoPlayer
-      v-if="subtitles.length"
-      :videoUrl="videoUrl"
+      v-if="showVideoPlayer"
+      :videoUrl="currentVideoUrl"
       :videoId="currentVideoId"
       :subtitles="subtitles"
       :meta="meta"
       @timeupdate="handleTimeUpdate"
+      @close="closeVideoPlayer"
     />
   </div>
 </template>
@@ -21,12 +32,10 @@
 import { ref } from "vue";
 import axios from "axios";
 import VideoPlayer from "../components/VideoPlayer.vue";
-// import { parseSRT } from './utils/srtParser';
 import { extractVideoId } from "../utils/youtubeUtils";
-// import { translateSubtitles } from './services/translationService';
 import CarouselCard from '@/components/CarouselCard.vue';
-// 基础 URL
-const API_BASE_URL = "http://localhost:3000";
+
+const API_BASE_URL = "http://192.168.128.179:3000";
 
 export default {
   name: "VideoView",
@@ -35,40 +44,71 @@ export default {
     CarouselCard
   },
   setup() {
-    const videoUrl = ref("");
+    const userInputUrl = ref("");
+    const currentVideoUrl = ref("");
     const subtitles = ref([]);
     const meta = ref({});
     const currentVideoId = ref("");
+    const showVideoPlayer = ref(false);
 
     const carouselItems = ref([
-      { title: 'Video 1', description: 'Description 1', videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc' },
-      { title: 'Video 2', description: 'Description 2', videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc' },
-      { title: 'Video 3', description: 'Description 3', videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc' },
-      { title: 'Video 4', description: 'Description 4', videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc' },
-      { title: 'Video 5', description: 'Description 5', videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc' },
+      { 
+        title: 'Scent of a Woman | "I\'ll Show You Out of Order!"', 
+        coverAddress: 'https://img.youtube.com/vi/Jd10x8LiuBc/sddefault.jpg',
+        duration: '05:38',
+        videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: 'Morgan Freeman Red Misses Andy Dufresne - The Shawshank Redemption (1994)', 
+        duration: '01:51',
+        coverAddress: 'https://img.youtube.com/vi/mgwZr0r_yF0/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=mgwZr0r_yF0',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: 'Queen – Bohemian Rhapsody (Official Video Remastered)', 
+        duration: '05:59',
+        coverAddress: 'https://img.youtube.com/vi/fJ9rUzIMcZQ/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=fJ9rUzIMcZQ',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: 'U.S.A. For Africa - We Are the World"', 
+        duration: '07:11',
+        coverAddress: 'https://img.youtube.com/vi/9AjkUyX0rVw/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=9AjkUyX0rVw',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: "Robin Williams' Speech | Good Will Hunting | Max", 
+        duration: '05:00',
+        coverAddress: 'https://img.youtube.com/vi/8GY3sO47YYo/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=8GY3sO47YYo',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: "Pink Floyd Another Brick In The Wall (HQ)", 
+        duration: '06:00',
+        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
+        videoPlatform: 'youtube'
+      },
     ]);
-      // { title: 'Card 6', description: 'This is the 6 card' },
-      // { title: 'Card 7', description: 'This is the 7 card' },
-      // { title: 'Card 8', description: 'This is the 8 card' },
-      // { title: 'Card 9', description: 'This is the 9 card' },
-      // { title: 'Card 10', description: 'This is the 10 card' },
-      // { title: 'Card 11', description: 'This is the 11 card' },
-      // { title: 'Card 12', description: 'This is the 12 card' },
-      // { title: 'Card 13', description: 'This is the 13 card' },
-    // ];
 
     const handleCardClick = (url) => {
-      videoUrl.value = url;
+      currentVideoUrl.value = url;
       extractSubtitles(url);
     };
 
     const extractSubtitles = async (url) => {
-      const targetUrl = url || videoUrl.value;
+      const targetUrl = url || userInputUrl.value;
       if (!targetUrl) {
         alert("请输入 YouTube 视频链接或选择一个预设视频");
         return;
       }
 
+      currentVideoUrl.value = targetUrl;
       const videoId = extractVideoId(targetUrl);
       currentVideoId.value = videoId;
 
@@ -86,6 +126,7 @@ export default {
             subtitles.value = parsedData.subtitles;
             meta.value = parsedData.metadata;
             console.log("从 localStorage 加载字幕数据");
+            showVideoPlayer.value = true;
             return;
           }
         } catch (error) {
@@ -102,28 +143,21 @@ export default {
       }
 
       try {
-        console.log("正在从服务器获取字幕，URL:", videoUrl.value);
+        console.log("正在从服务器获取字幕，URL:", targetUrl);
         const response = await axios.post(
           `${API_BASE_URL}/extract-and-translate-subtitles`,
           {
-            videoUrl: videoUrl.value,
+            videoUrl: targetUrl,
           }
         );
         console.log("收到响应:", response);
 
         if (response.data && response.data.subtitles) {
-          console.log("接收到的字幕数据:", response.data.subtitles);
-          // const parsedSubtitles = parseSRT(response.data.subtitles)
-          // const parsedSubtitles = response.data.subtitles
-
-          // 调用翻译服务
-          // subtitles.value = await translateSubtitles(parsedSubtitles)
-
-          // srt 数据格式化功能、翻译功能都已迁移至后端
           subtitles.value = response.data.subtitles;
           meta.value = response.data.metadata;
           console.log("解析和翻译后的字幕:", subtitles.value);
           localStorage.setItem(videoId, JSON.stringify(response.data));
+          showVideoPlayer.value = true;
         } else {
           throw new Error("无效的字幕数据");
         }
@@ -148,29 +182,41 @@ export default {
       // 可以在这里添加额外的逻辑，如果需要的话
     };
 
+    const closeVideoPlayer = () => {
+      showVideoPlayer.value = false;
+    };
+
     return {
-      videoUrl,
+      userInputUrl,
+      currentVideoUrl,
       subtitles,
       meta,
       extractSubtitles,
       handleTimeUpdate,
       currentVideoId,
       carouselItems,
-      handleCardClick
+      handleCardClick,
+      showVideoPlayer,
+      closeVideoPlayer
     };
   },
 };
 </script>
+<style lang="scss" scoped>
+.input-card {
+  padding: 8px 16px;
+  background-color: #1cce6b;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
 
-<style>
+  input {
+    margin-right: 10px;
+    padding: 5px;
+    width: 300px;
+  }
 
-input {
-  margin-right: 10px;
-  padding: 5px;
-  width: 300px;
-}
-
-button {
-  padding: 5px 10px;
+  button {
+    padding: 5px 10px;
+  }
 }
 </style>

@@ -1,22 +1,25 @@
 <template>
   <div id="app" class="app-container">
-    <TopBar class="top-bar" />
+    <!-- <TopBar class="top-bar" /> -->
     <main class="main-content">
       <router-view></router-view>
     </main>
-    <BottomNav class="bottom-nav" />
+    <!-- <BottomNav class="bottom-nav" /> -->
+    <NewBottomNav class="bottom-nav" />
   </div>
 </template>
 
 <script>
-import BottomNav from './components/BottomNav.vue'
-import TopBar from './components/TopBar.vue'
+// import BottomNav from './components/BottomNav.vue'
+import NewBottomNav from './components/NewBottomNav.vue'
+// import TopBar from './components/TopBar.vue'
 
 export default {
   name: 'App',
   components: {
-    BottomNav,
-    TopBar
+    // BottomNav,
+    NewBottomNav,
+    // TopBar
   }
 }
 </script>
@@ -39,28 +42,28 @@ body, html {
 }
 
 .app-container {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
   height: 100%;
   overflow: hidden;
 }
 
-.top-bar {
+/* .top-bar {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background-color: #fff; /* 确保内容不会透过去 */
-}
+  background-color: #fff;
+} */
 
 .main-content {
   overflow-y: auto;
-  background-color: var(--app-content-background-color);
+  /* background-color: var(--app-content-background-color); */
 }
 
 .bottom-nav {
-  position: sticky;
+  position: fixed;
   bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
-  background-color: #fff; /* 确保内容不会透过去 */
 }
 </style>
