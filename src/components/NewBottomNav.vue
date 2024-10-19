@@ -3,35 +3,41 @@
     <a
       v-for="option in navigationOptions"
       :key="option.name"
-      :class="{ active: activeOption === option.name }"
+      :class="{ active: activeOption === option.name, 'bottom-nav-item': true }"
       href="#"
       @click.prevent="handleClick(option)"
       :style="{ '--hover-bg': `${option.color}20`, '--hover-c': option.color }"
     >
-      <svg viewBox="0 0 100 100">
-        <g :transform="option.svgTransform">
-          <component :is="option.svgComponent" v-bind="option.svgProps" />
-          <component
-            v-for="(child, index) in option.children"
-            :key="index"
-            :is="child.component"
-            v-bind="child.props"
-          />
-        </g>
-      </svg>
-      <span>
-        {{ option.name.charAt(0).toUpperCase() + option.name.slice(1) }}
-      </span>
+      <router-link :to="option.route" class="bottom-nav-router">
+        <svg viewBox="0 0 100 100">
+          <g :transform="option.svgTransform">
+            <component :is="option.svgComponent" v-bind="option.svgProps" />
+            <component
+              v-for="(child, index) in option.children"
+              :key="index"
+              :is="child.component"
+              v-bind="child.props"
+            />
+          </g>
+        </svg>
+        <span>
+          {{ option.name.charAt(0).toUpperCase() + option.name.slice(1) }}
+        </span>
+      </router-link>
     </a>
   </nav>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref,  onMounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
+
+const router = useRouter();
+const route = useRoute();
 
 const navigationOptions = [
   {
-    name: "home",
+    name: "video",
     color: "#5B37B7",
     svgTransform: "translate(10 5) scale(0.8 0.9)",
     svgComponent: "path",
@@ -43,9 +49,10 @@ const navigationOptions = [
       "stroke-linejoin": "round",
       "stroke-linecap": "round",
     },
+    route: "/video",
   },
   {
-    name: "likes",
+    name: "words",
     color: "#C9379D",
     svgTransform: "translate(5 5) scale(0.9 0.9)",
     svgComponent: "path",
@@ -57,6 +64,7 @@ const navigationOptions = [
       "stroke-linejoin": "round",
       "stroke-linecap": "round",
     },
+    route: "/words",
   },
   {
     name: "profile",
@@ -90,17 +98,44 @@ const navigationOptions = [
         },
       },
     ],
+    route: "/settings",
   },
 ];
 
-const activeOption = ref("home");
+const activeOption = ref(
+  navigationOptions.find((option) => option.route === route.path)?.name ||
+    "Video"
+);
 
 const handleClick = (option) => {
   activeOption.value = option.name;
+  router.push(option.route);
   document.body.style.background = option.color;
 };
-</script>
 
+// 监听路由变化
+watch(
+  () => route.path,
+  (newPath) => {
+    const newActiveOption = navigationOptions.find(
+      (option) => option.route === newPath
+    )?.name;
+    if (newActiveOption && newActiveOption !== activeOption.value) {
+      activeOption.value = newActiveOption;
+      document.body.style.background = navigationOptions.find(
+        (option) => option.name === newActiveOption
+      ).color;
+    }
+  }
+);
+
+onMounted(() => {
+  // 初始化背景颜色
+  document.body.style.background = navigationOptions.find(
+    (option) => option.name === activeOption.value
+  ).color;
+});
+</script>
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:700");
@@ -112,7 +147,7 @@ nav {
   justify-content: space-between;
 }
 
-a {
+.bottom-nav-item {
   color: inherit;
   text-decoration: none;
   margin: 0 0.2rem;
@@ -123,7 +158,12 @@ a {
   position: relative;
 }
 
-a svg {
+.bottom-nav-router {
+  display: flex;
+  align-items: center;
+}
+
+.bottom-nav-item svg {
   margin-right: -2.5rem;
   width: 22px;
   height: 22px;
@@ -131,14 +171,15 @@ a svg {
   transition: margin 0.2s ease-out;
 }
 
-a span {
+.bottom-nav-item span {
   opacity: 0;
   visibility: hidden;
-  font-size: 0.9rem;
-  margin-left: 0.9rem;
+  font-size: 1rem;
+  font-weight: 900;
+  margin-left: 0.6rem;
 }
 
-a:before {
+.bottom-nav-item:before {
   position: absolute;
   content: "";
   top: 50%;
@@ -151,12 +192,12 @@ a:before {
   opacity: 1;
 }
 
-a.active {
+.bottom-nav-item.active {
   background: var(--hover-bg);
   color: var(--hover-c);
 }
 
-a.active:before {
+.bottom-nav-item.active:before {
   background: var(--hover-c);
   opacity: 0;
   visibility: hidden;
@@ -164,13 +205,18 @@ a.active:before {
   transition: all 0.4s ease-out;
 }
 
-a.active svg {
+.bottom-nav-item.active svg {
   margin-right: 0;
 }
 
-a.active span {
+.bottom-nav-item.active span {
   visibility: visible;
   opacity: 1;
   transition: all 0.2s ease-out;
+}
+
+.bottom-nav-router {
+  text-decoration: none;
+  color: inherit;
 }
 </style>
