@@ -47,11 +47,14 @@ export default {
       { title: 'Card 3', description: 'This is the 3 card' },
       { title: 'Card 4', description: 'This is the 4 card' },
       { title: 'Card 5', description: 'This is the 5 card' },
-      { title: 'Card 6', description: 'This is the 6 card' },
-      { title: 'Card 7', description: 'This is the 7 card' },
-      { title: 'Card 8', description: 'This is the 8 card' },
-      { title: 'Card 9', description: 'This is the 9 card' },
-      // 添加更多卡片...
+      // { title: 'Card 6', description: 'This is the 6 card' },
+      // { title: 'Card 7', description: 'This is the 7 card' },
+      // { title: 'Card 8', description: 'This is the 8 card' },
+      // { title: 'Card 9', description: 'This is the 9 card' },
+      // { title: 'Card 10', description: 'This is the 10 card' },
+      // { title: 'Card 11', description: 'This is the 11 card' },
+      // { title: 'Card 12', description: 'This is the 12 card' },
+      // { title: 'Card 13', description: 'This is the 13 card' },
     ];
 
     const extractSubtitles = async () => {

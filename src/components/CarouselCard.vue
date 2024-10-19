@@ -11,7 +11,7 @@
         :key="index"
         class="carousel-item"
         :class="{ active: index === currentIndex }"
-        :style="{ transform: `translateX(${(index - currentIndex) * 60}px) scale(${1 - Math.abs(index - currentIndex) * 0.1})`, zIndex: items.length - Math.abs(index - currentIndex) }"
+        :style="getItemStyle(index)"
       >
         <div class="card">
           <h3>{{ item.title }}</h3>
@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 
 export default {
   name: "CarouselCard",
@@ -33,11 +33,23 @@ export default {
       required: true,
     },
   },
-  setup(props) {  // 添加 props 参数
+  setup(props) {
     const currentIndex = ref(0);
     const container = ref(null);
     let startX = 0;
     let currentX = 0;
+
+    const getItemStyle = (index) => {
+      const totalItems = props.items.length;
+      const diff = (index - currentIndex.value + totalItems) % totalItems;
+      const adjustedDiff = diff > totalItems / 2 ? diff - totalItems : diff;
+      const xOffset = adjustedDiff * 30; // 控制 card 横向展示疏密的代码。
+      const scale = 1 - Math.abs(adjustedDiff) * 0.1;
+      return {
+        transform: `translateX(${xOffset}px) scale(${scale})`,
+        zIndex: totalItems - Math.abs(adjustedDiff),
+      };
+    };
 
     const touchStart = (e) => {
       startX = e.touches[0].clientX;
@@ -53,17 +65,13 @@ export default {
       const threshold = container.value.offsetWidth / 4;
 
       if (Math.abs(diff) > threshold) {
-        if (diff > 0 && currentIndex.value < props.items.length - 1) {  // 使用 props.items
-          currentIndex.value++;
-        } else if (diff < 0 && currentIndex.value > 0) {
-          currentIndex.value--;
+        if (diff > 0) {
+          currentIndex.value = (currentIndex.value + 1) % props.items.length;
+        } else {
+          currentIndex.value = (currentIndex.value - 1 + props.items.length) % props.items.length;
         }
       }
     };
-
-    onMounted(() => {
-      // 可以在这里添加初始化逻辑
-    });
 
     return {
       currentIndex,
@@ -71,10 +79,12 @@ export default {
       touchStart,
       touchMove,
       touchEnd,
+      getItemStyle,
     };
   },
 };
 </script>
+
 <style scoped>
 .carousel-container {
   width: 100%;
@@ -87,7 +97,7 @@ export default {
   justify-content: center;
   align-items: center;
   position: relative;
-  height: 300px; /* 调整高度以适应您的设计 */
+  height: 300px;
 }
 
 .carousel-item {
@@ -96,7 +106,7 @@ export default {
 }
 
 .card {
-  width: 260px; /* 固定宽度 */
+  width: 260px;
   height: 160px;
   background-color: #fff;
   border-radius: 10px;
