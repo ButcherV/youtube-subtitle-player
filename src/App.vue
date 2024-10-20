@@ -43,6 +43,7 @@ body, html {
 
 .app-container {
   display: flex;
+  flex-direction: column;
   height: 100%;
   overflow: hidden;
 }
@@ -56,6 +57,7 @@ body, html {
 
 .main-content {
   overflow-y: auto;
+  padding-bottom: 50px;
   /* background-color: var(--app-content-background-color); */
 }
 

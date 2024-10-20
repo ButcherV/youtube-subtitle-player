@@ -15,8 +15,21 @@
         <button class="info-card-add-button" @click="extractSubtitles(userInputUrl)">+</button>
       </div>
     </div>
-    <div class="carousel-wrapper" v-if="!showVideoPlayer">
-      <CarouselCard :items="carouselItems" @cardClick="handleCardClick"/>
+    <div class="card-wrapper" v-if="!showVideoPlayer">
+      <div class="card-info">
+        <p class="card-info-title">#History</p>
+        <p class="card-info-subtitle" @click="toggleListView">{{ isListView ? 'Back' : 'See All' }}</p>
+      </div>
+      <CarouselCard 
+        v-if="!isListView" 
+        :items="carouselItems" 
+        @cardClick="handleCardClick"
+      />
+      <VideoList
+        v-else
+        :items="carouselItems"
+        @itemClick="handleCardClick"
+      />
     </div>
     <VideoPlayer
       v-if="showVideoPlayer"
@@ -36,6 +49,7 @@ import axios from "axios";
 import VideoPlayer from "../components/VideoPlayer.vue";
 import { extractVideoId } from "../utils/youtubeUtils";
 import CarouselCard from '@/components/CarouselCard.vue';
+import VideoList from '@/components/VideoList.vue';
 
 const API_BASE_URL = "http://192.168.128.179:3000";
 
@@ -43,7 +57,8 @@ export default {
   name: "VideoView",
   components: {
     VideoPlayer,
-    CarouselCard
+    CarouselCard,
+    VideoList
   },
   setup() {
     const userInputUrl = ref("");
@@ -52,6 +67,7 @@ export default {
     const meta = ref({});
     const currentVideoId = ref("");
     const showVideoPlayer = ref(false);
+    const isListView = ref(false);
 
     const carouselItems = ref([
       { 
@@ -96,7 +112,88 @@ export default {
         videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
         videoPlatform: 'youtube'
       },
+      { 
+        title: "Pink Floyd Another Brick In The Wall (HQ)", 
+        duration: '06:00',
+        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: "Pink Floyd Another Brick In The Wall (HQ)", 
+        duration: '06:00',
+        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: "Pink Floyd Another Brick In The Wall (HQ)", 
+        duration: '06:00',
+        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: "Pink Floyd Another Brick In The Wall (HQ)", 
+        duration: '06:00',
+        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: "Pink Floyd Another Brick In The Wall (HQ)", 
+        duration: '06:00',
+        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
+        videoPlatform: 'youtube'
+      },      { 
+        title: "Pink Floyd Another Brick In The Wall (HQ)", 
+        duration: '06:00',
+        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: "Pink Floyd Another Brick In The Wall (HQ)", 
+        duration: '06:00',
+        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: "Pink Floyd Another Brick In The Wall (HQ)", 
+        duration: '06:00',
+        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: "Pink Floyd Another Brick In The Wall (HQ)", 
+        duration: '06:00',
+        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: "Pink Floyd Another Brick In The Wall (HQ)", 
+        duration: '06:00',
+        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
+        videoPlatform: 'youtube'
+      },
+      { 
+        title: "Pink Floyd Another Brick In The Wall (HQ)", 
+        duration: '06:00',
+        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
+        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
+        videoPlatform: 'youtube'
+      },
     ]);
+
+    const toggleListView = () => {
+      isListView.value = !isListView.value;
+    };
+
 
     const handleCardClick = (url) => {
       currentVideoUrl.value = url;
@@ -199,7 +296,9 @@ export default {
       carouselItems,
       handleCardClick,
       showVideoPlayer,
-      closeVideoPlayer
+      closeVideoPlayer,
+      isListView,
+      toggleListView,
     };
   },
 };
@@ -282,4 +381,32 @@ export default {
   padding-top: 8px;
   font-weight: 600;
 }
+
+.card-info {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  font-weight: bold;
+}
+
+.card-info-title {
+  font-size: 24px;
+  font-weight: bold;
+  font-weight: 900;
+}
+
+.card-info-subtitle {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.card-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
 </style>

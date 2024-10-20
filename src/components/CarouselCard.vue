@@ -1,10 +1,6 @@
 <template>
   <div class="carousel-container" ref="container">
     <div>
-      <div class="carousel-info">
-        <p class="carousel-info-title">#History</p>
-        <p class="carousel-info-subtitle">See All</p>
-      </div>
       <div
         class="carousel"
         @touchstart="touchStart"
@@ -101,31 +97,9 @@ export default {
 .carousel-container {
   width: 100%;
   overflow: hidden;
-  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-top: -35px;
-}
-
-.carousel-info {
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: white;
-  font-weight: bold;
-}
-
-.carousel-info-title {
-  font-size: 24px;
-  font-weight: bold;
-  font-weight: 900;
-}
-
-.carousel-info-subtitle {
-  font-size: 14px;
-  font-weight: bold;
 }
 
 .carousel {

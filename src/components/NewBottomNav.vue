@@ -153,8 +153,8 @@ onMounted(() => {
 
 nav {
   display: flex;
-  background: #fff;
-  padding: 1rem;
+  background: white;
+  padding: 8px 16px;
   justify-content: space-between;
 }
 
