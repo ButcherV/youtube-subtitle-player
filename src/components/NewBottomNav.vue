@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref,  onMounted, watch } from "vue";
+import { ref, onMounted, watch, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
@@ -129,12 +129,23 @@ watch(
   }
 );
 
+
+// 初始化背景颜色
+// 为什么要用 nextTick?
+// 因为初始化中 body 的背景颜色的更新会导致 CarouselCard 渲染出问题，其宽度计算不准确
+// 非常奇葩的 bug。
 onMounted(() => {
-  // 初始化背景颜色
-  document.body.style.background = navigationOptions.find(
-    (option) => option.name === activeOption.value
-  ).color;
+  nextTick(() => {
+    document.body.style.background = navigationOptions.find(
+      (option) => option.name === activeOption.value
+    ).color;
+  });
 });
+// onMounted(() => {
+//   document.body.style.background = navigationOptions.find(
+//     (option) => option.name === activeOption.value
+//   ).color;
+// });
 </script>
 
 <style scoped>

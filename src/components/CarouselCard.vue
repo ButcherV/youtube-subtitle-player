@@ -1,25 +1,31 @@
 <template>
   <div class="carousel-container" ref="container">
-    <div
-      class="carousel"
-      @touchstart="touchStart"
-      @touchmove="touchMove"
-      @touchend="touchEnd"
-    >
+    <div>
+      <div class="carousel-info">
+        <p class="carousel-info-title">#History</p>
+        <p class="carousel-info-subtitle">See All</p>
+      </div>
       <div
-        v-for="(item, index) in items"
-        :key="index"
-        class="carousel-item"
-        :class="{ active: index === currentIndex }"
-        :style="getItemStyle(index)"
-        @click="$emit('cardClick', item.videoUrl)"
+        class="carousel"
+        @touchstart="touchStart"
+        @touchmove="touchMove"
+        @touchend="touchEnd"
       >
-        <div class="card">
-          <img class="card-cover-address" :src="item.coverAddress" alt="Cover" />
-          <div v-if="item.videoPlatform" class="card-platform-icon" :class="item.videoPlatform"></div>
-          <div>
-            <p class="card-duration">{{ item.duration }}</p>
-            <h3 class="card-title">{{ item.title }}</h3>
+        <div
+          v-for="(item, index) in items"
+          :key="index"
+          class="carousel-item"
+          :class="{ active: index === currentIndex }"
+          :style="getItemStyle(index)"
+          @click="$emit('cardClick', item.videoUrl)"
+        >
+          <div class="card">
+            <img class="card-cover-address" :src="item.coverAddress" alt="Cover" />
+            <div v-if="item.videoPlatform" class="card-platform-icon" :class="item.videoPlatform"></div>
+            <div>
+              <p class="card-duration">{{ item.duration }}</p>
+              <h3 class="card-title">{{ item.title }}</h3>
+            </div>
           </div>
         </div>
       </div>
@@ -95,7 +101,31 @@ export default {
 .carousel-container {
   width: 100%;
   overflow: hidden;
-  padding: 20px 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: -35px;
+}
+
+.carousel-info {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  font-weight: bold;
+}
+
+.carousel-info-title {
+  font-size: 24px;
+  font-weight: bold;
+  font-weight: 900;
+}
+
+.carousel-info-subtitle {
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .carousel {
@@ -103,7 +133,7 @@ export default {
   justify-content: center;
   align-items: center;
   position: relative;
-  height: 300px;
+  min-height: 210px;
 }
 
 .carousel-item {

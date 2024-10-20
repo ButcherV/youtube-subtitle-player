@@ -1,20 +1,21 @@
 <template>
-  <div>
-    <div v-if="!showVideoPlayer">
-      <div class="info-card">
-        <div>
-          <p class="info-card-title">Hi, Xiaowei</p>
-          <p class="info-card-subtitle">本月视频引入时长：2 小时 23 分</p>
-        </div>
-        <div class="info-card-input-group">
-          <input
-            class="info-card-input"
-            v-model="userInputUrl"
-            placeholder="输入 YouTube 视频链接"
-          />
-          <button class="info-card-add-button" @click="extractSubtitles(userInputUrl)">+</button>
-        </div>
+  <div class="video-view-container">
+    <div class="info-card" v-if="!showVideoPlayer">
+      <div>
+        <p class="info-card-title">Hi, Xiaowei</p>
+        <p class="info-card-subtitle">本日视频引入时长：13 分</p>
+        <p class="info-card-subtitle">本月时长配额：2 小时 23 分 / 5 小时</p>
       </div>
+      <div class="info-card-input-group">
+        <input
+          class="info-card-input"
+          v-model="userInputUrl"
+          placeholder="输入 YouTube 视频链接"
+        />
+        <button class="info-card-add-button" @click="extractSubtitles(userInputUrl)">+</button>
+      </div>
+    </div>
+    <div class="carousel-wrapper" v-if="!showVideoPlayer">
       <CarouselCard :items="carouselItems" @cardClick="handleCardClick"/>
     </div>
     <VideoPlayer
@@ -204,6 +205,17 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.video-view-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.carousel-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
 .info-card {
   padding: 16px;
   background-color: #1cce6b;
@@ -257,7 +269,7 @@ export default {
 }
 
 .info-card-title {
-  font-size: 24px;
+  font-size: 32px;
   text-align: left;
   font-weight: 900;
   color: white;
