@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="app-container">
+  <div class="app-container">
     <!-- <TopBar class="top-bar" /> -->
     <main class="main-content">
       <router-view></router-view>
@@ -11,6 +11,7 @@
 
 <script>
 // import BottomNav from './components/BottomNav.vue'
+import { onMounted, onUnmounted } from 'vue'
 import NewBottomNav from './components/NewBottomNav.vue'
 // import TopBar from './components/TopBar.vue'
 
@@ -20,44 +21,45 @@ export default {
     // BottomNav,
     NewBottomNav,
     // TopBar
+  },
+  setup() {
+    const setViewportHeight = () => {
+      let vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+
+    onMounted(() => {
+      setViewportHeight()
+      window.addEventListener('resize', setViewportHeight)
+      window.addEventListener('orientationchange', setViewportHeight)
+    })
+
+    onUnmounted(() => {
+      window.removeEventListener('resize', setViewportHeight)
+      window.removeEventListener('orientationchange', setViewportHeight)
+    })
   }
 }
 </script>
 
-<style>
-/* 全局样式 */
-body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
+<style lang="scss" scoped>
 
-#app {
+.app-container {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  height: 100%;
-}
-
-.app-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: calc(var(--vh, 1vh) * 100);
   overflow: hidden;
 }
 
-/* .top-bar {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  background-color: #fff;
-} */
-
 .main-content {
   overflow-y: auto;
-  padding-bottom: 50px;
+  flex: 1;
+  padding-bottom: 50px; // 50px is the height of the bottom nav
   /* background-color: var(--app-content-background-color); */
 }
 
@@ -66,6 +68,7 @@ body, html {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: $zIndexBottomBar;
+  box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.1);
 }
 </style>

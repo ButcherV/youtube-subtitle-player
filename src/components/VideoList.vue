@@ -36,6 +36,7 @@ export default {
 <style scoped lang="scss">
 .list-view {
   padding: 16px;
+  padding-top: 0;
   flex-grow: 1;
   overflow-y: auto;
 }
@@ -43,14 +44,14 @@ export default {
 .list-item {
   display: flex;
   align-items: center;
-  padding: 12px;
+  padding: 8px;
   background-color: white;
-  border-radius: 16px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
 
   & + .list-item {
-    margin-top: 16px;
+    margin-top: 8px;
   }
 
   &:hover {
@@ -59,8 +60,8 @@ export default {
 }
 
 .list-item-cover {
-  width: 120px;
-  height: 90px;
+  width: 90px;
+  height: 60px;
   object-fit: cover;
   border-radius: 8px;
   margin-right: 16px;
@@ -74,25 +75,25 @@ export default {
 }
 
 .list-item-title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
   text-align: left;
 }
 
 .list-item-duration {
-  font-size: 14px;
+  font-size: 12px;
   color: #666;
   margin: 0;
   text-align: left;
 }
 
 .list-item-platform {
-  width: 24px;
-  height: 24px;
+  // width: 24px;
+  // height: 24px;
   background-size: contain;
   background-repeat: no-repeat;
-  margin-top: 8px;
+  // margin-top: 8px;
 
   &.youtube {
     background-image: url("../assets/images/logo_youtube.png");

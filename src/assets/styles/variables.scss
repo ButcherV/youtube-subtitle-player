@@ -20,3 +20,13 @@ $outset-shadow: var(--outset-shadow);
 $clay-box-shadow: var(--clay-box-shadow);
 $clay-background-color: var(--clay-background-color);
 $clay-fg-color: var(--clay-fg-color);
+
+
+// global z-index
+$zIndexBottomBar: 9999;
+$zIndexVideoPlayer: 10000;
+$zIndexSubtitleAnalysisPopup: 99999;
+
+
+// global colors
+$green: #1cce6b;

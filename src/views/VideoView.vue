@@ -12,13 +12,17 @@
           v-model="userInputUrl"
           placeholder="输入 YouTube 视频链接"
         />
-        <button class="info-card-add-button" @click="extractSubtitles(userInputUrl)">+</button>
+        <button class="info-card-add-button" @click="extractSubtitles(userInputUrl)">
+          <font-awesome-icon icon="plus" />
+        </button>
       </div>
     </div>
     <div class="card-wrapper" v-if="!showVideoPlayer">
       <div class="card-info">
         <p class="card-info-title">#History</p>
-        <p class="card-info-subtitle" @click="toggleListView">{{ isListView ? 'Back' : 'See All' }}</p>
+        <div class="card-info-subtitle" @click="toggleListView">
+          <font-awesome-icon :icon="isListView ? 'chevron-up' : 'chevron-down'" />
+        </div>
       </div>
       <CarouselCard 
         v-if="!isListView" 
@@ -31,15 +35,19 @@
         @itemClick="handleCardClick"
       />
     </div>
-    <VideoPlayer
-      v-if="showVideoPlayer"
-      :videoUrl="currentVideoUrl"
-      :videoId="currentVideoId"
-      :subtitles="subtitles"
-      :meta="meta"
-      @timeupdate="handleTimeUpdate"
-      @close="closeVideoPlayer"
-    />
+    <Teleport to="body">
+      <Transition name="slide-left">
+        <VideoPlayer
+          v-if="showVideoPlayer"
+          :videoUrl="currentVideoUrl"
+          :videoId="currentVideoId"
+          :subtitles="subtitles"
+          :meta="meta"
+          @timeupdate="handleTimeUpdate"
+          :onClose="closeVideoPlayer"
+        />
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -67,7 +75,7 @@ export default {
     const meta = ref({});
     const currentVideoId = ref("");
     const showVideoPlayer = ref(false);
-    const isListView = ref(false);
+    const isListView = ref(true);
 
     const carouselItems = ref([
       { 
@@ -317,9 +325,13 @@ export default {
 }
 .info-card {
   padding: 16px;
-  background-color: #1cce6b;
+  background-color: $green;
   border-bottom-left-radius: 16px;
   border-bottom-right-radius: 16px;
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 8px 15px rgba(0, 0, 0, 0.05);
 }
 
 .info-card-input-group {
@@ -333,7 +345,7 @@ export default {
   padding: 10px;
   border: 4px solid white;
   border-radius: 8px 0 0 8px;
-  background-color: #1cce6b;
+  background-color: $green;
   color: white;
 }
 
@@ -389,6 +401,8 @@ export default {
   align-items: center;
   color: white;
   font-weight: bold;
+  position: sticky;
+  top: 0;
 }
 
 .card-info-title {
@@ -407,6 +421,21 @@ export default {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.slide-left-enter-from,
+.slide-left-leave-to {
+  transform: translateX(100%);
+}
+
+.slide-left-enter-to,
+.slide-left-leave-from {
+  transform: translateX(0);
 }
 
 </style>

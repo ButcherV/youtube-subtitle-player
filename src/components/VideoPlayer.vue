@@ -1,6 +1,11 @@
 <template>
   <div class="video-player">
-    <div class="video-title">{{ meta.videoTitle }}</div>
+    <div class="video-title-wrapper">
+      <button class="back-button" @click="closePlayer">
+        <font-awesome-icon icon="arrow-left" />
+      </button>
+      <h2 class="video-title">{{ meta.videoTitle }}</h2>
+    </div>
     <VideoContainer
       :video-url="videoUrl"
       @player-ready="onPlayerReady"
@@ -64,6 +69,10 @@ export default {
       type: String,
       required: true,
     },
+    onClose: {
+      type: Function,
+      required: true
+    }
   },
   setup(props) {
     console.log('Received subtitles:', props.subtitles);
@@ -75,6 +84,9 @@ export default {
     const loopStart = ref(0);
     const loopEnd = ref(0);
 
+    const closePlayer = () => {
+      props.onClose();
+    };
     // 解析字幕
     const parsedSubtitles = computed(() => props.subtitles);
 
@@ -192,13 +204,14 @@ export default {
       toggleLoop,
       currentSubtitleText,
       currentSubtitleId,
-      stopLooping
+      stopLooping,
+      closePlayer,
     };
   },
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .video-player {
   display: flex;
   flex-direction: column;
@@ -206,5 +219,42 @@ export default {
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: $zIndexVideoPlayer;
+  background-color: white;
+}
+
+.video-title-wrapper {
+  display: flex;
+  align-items: center;
+  height: 48px; // 定高
+  padding: 8px 16px ;
+  background-color: #f5f5f5;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 16px;
+}
+
+.video-title {
+  flex: 1;
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.2;
+  max-height: 2.4em; // 2 行的高度
 }
 </style>

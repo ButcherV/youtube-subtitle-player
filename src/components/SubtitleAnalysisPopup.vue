@@ -126,7 +126,7 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style scoped lang="scss">
 .subtitle-analysis-popup {
   position: fixed;
   bottom: -100%;
@@ -135,7 +135,7 @@ export default {
   background-color: white;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   transition: bottom 0.3s ease-in-out;
-  z-index: 1000;
+  z-index: $zIndexSubtitleAnalysisPopup;
 }
 
 .subtitle-analysis-popup.active {
