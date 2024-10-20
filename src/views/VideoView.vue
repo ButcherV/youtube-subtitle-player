@@ -1,17 +1,18 @@
 <template>
   <div>
     <div v-if="!showVideoPlayer">
-      <div class="input-card">
+      <div class="info-card">
         <div>
-          <p>Hi, xiaowei</p>
-          <p>或选择预设视频</p>
+          <p class="info-card-title">Hi, Xiaowei</p>
+          <p class="info-card-subtitle">本月视频引入时长：2 小时 23 分</p>
         </div>
-        <div>
+        <div class="info-card-input-group">
           <input
+            class="info-card-input"
             v-model="userInputUrl"
             placeholder="输入 YouTube 视频链接"
           />
-          <button @click="extractSubtitles(userInputUrl)">+</button>
+          <button class="info-card-add-button" @click="extractSubtitles(userInputUrl)">+</button>
         </div>
       </div>
       <CarouselCard :items="carouselItems" @cardClick="handleCardClick"/>
@@ -203,20 +204,70 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.input-card {
-  padding: 8px 16px;
+.info-card {
+  padding: 16px;
   background-color: #1cce6b;
   border-bottom-left-radius: 16px;
   border-bottom-right-radius: 16px;
+}
 
-  input {
-    margin-right: 10px;
-    padding: 5px;
-    width: 300px;
-  }
+.info-card-input-group {
+  display: flex;
+  margin-top: 16px;
+}
 
-  button {
-    padding: 5px 10px;
-  }
+.info-card-input {
+  flex-grow: 1;
+  width: 300px;
+  padding: 10px;
+  border: 4px solid white;
+  border-radius: 8px 0 0 8px;
+  background-color: #1cce6b;
+  color: white;
+}
+
+.info-card-input::placeholder {
+  color: white;
+  font-weight: 900;
+}
+
+.info-card-add-button {
+  width: 44px;
+  height: 44px;
+  background-color: transparent;
+  border: 4px solid white;
+  border-radius: 0 8px 8px 0; /* 右边圆角 */
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+}
+
+/* 确保输入框和按钮紧密相连 */
+.info-card-input {
+  border-right-width: 2px;
+}
+
+.info-card-add-button {
+  border-left-width: 2px;
+  border-right-width: 4px;
+}
+
+.info-card-title {
+  font-size: 24px;
+  text-align: left;
+  font-weight: 900;
+  color: white;
+}
+
+.info-card-subtitle {
+  font-size: 14px;
+  color: white;
+  text-align: left;
+  padding-top: 8px;
+  font-weight: 600;
 }
 </style>
