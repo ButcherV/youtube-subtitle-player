@@ -4,25 +4,28 @@
     <main class="main-content">
       <router-view></router-view>
     </main>
+    <AuthModal v-if="isAuthModalVisible" @close="hideAuthModal"/>
     <!-- <BottomNav class="bottom-nav" /> -->
     <NewBottomNav class="bottom-nav" />
   </div>
 </template>
 
 <script>
-// import BottomNav from './components/BottomNav.vue'
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, provide } from 'vue'
 import NewBottomNav from './components/NewBottomNav.vue'
-// import TopBar from './components/TopBar.vue'
+import { useAuth } from './composables/useAuth'
+import AuthModal from './components/auth/AuthModal.vue'
 
 export default {
   name: 'App',
   components: {
-    // BottomNav,
     NewBottomNav,
-    // TopBar
+    AuthModal
   },
   setup() {
+    const auth = useAuth()
+    provide('auth', auth)
+
     const setViewportHeight = () => {
       let vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -38,10 +41,13 @@ export default {
       window.removeEventListener('resize', setViewportHeight)
       window.removeEventListener('orientationchange', setViewportHeight)
     })
+
+    return {
+      ...auth,
+    }
   }
 }
 </script>
-
 <style lang="scss" scoped>
 
 .app-container {
