@@ -3,12 +3,10 @@ import { ref, readonly } from "vue";
 
 export function useAuth() {
   const isAuthModalVisible = ref(false);
-  const isLoggedIn = ref(false); // 简单示例，实际应从 localStorage 或 API 获取
+  const isLoggedIn = ref(false); // 简单示例，实际应从 cookie 或 API 获取
 
   const showAuthModal = () => {
-    console.log("showAuthModal called, setting isAuthModalVisible to true");
     isAuthModalVisible.value = true;
-    console.log("isAuthModalVisible set to:", isAuthModalVisible.value);
   };
 
   const hideAuthModal = () => {

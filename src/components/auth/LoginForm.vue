@@ -1,8 +1,8 @@
 <template>
-  <form @submit.prevent="handleSubmit">
-    <input v-model="email" type="email" placeholder="邮箱" required />
-    <input v-model="password" type="password" placeholder="密码" required />
-    <button type="submit">登录</button>
+  <form @submit.prevent="handleSubmit" class="auth-form">
+    <input v-model="email" type="email" placeholder="邮箱" required class="auth-input" />
+    <input v-model="password" type="password" placeholder="密码" required class="auth-input" />
+    <button type="submit" class="auth-button">登录</button>
   </form>
 </template>
 
@@ -24,3 +24,35 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.auth-input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.auth-button {
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.auth-button:hover {
+  background-color: #45a049;
+}
+</style>

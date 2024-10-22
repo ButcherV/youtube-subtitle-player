@@ -5,13 +5,13 @@
 
       <div class="tabs">
         <button
-          :class="{ active: activeTab === 'login' }"
+          :class="{ 'tab-button': true, active: activeTab === 'login' }"
           @click="activeTab = 'login'"
         >
           登录
         </button>
         <button
-          :class="{ active: activeTab === 'register' }"
+          :class="{ 'tab-button': true, active: activeTab === 'register' }"
           @click="activeTab = 'register'"
         >
           注册
@@ -60,12 +60,46 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999999999; /* 确保这个值足够大 */
+  z-index: 999999999;
 }
 
 .modal-content {
   background-color: white;
-  padding: 20px;
+  padding: 16px;
   border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  width: 80%;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tab-button.active {
+  border-bottom-color: #4CAF50;
+  color: #4CAF50;
 }
 </style>
