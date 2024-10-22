@@ -65,7 +65,7 @@ export default {
 
 .modal-content {
   background-color: white;
-  padding: 16px;
+  padding: 16px 24px;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   position: relative;
