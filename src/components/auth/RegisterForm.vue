@@ -44,8 +44,8 @@ const API_BASE_URL = "http://192.168.128.179:3000";
 export default {
   name: "RegisterForm",
   emits: ["register"],
-  setup(props, { emit }) {
-    const { login } = inject('auth');
+  setup() {
+    const auth = inject('auth');
     const email = ref("");
     const verificationCode = ref("");
     const password = ref("");
@@ -92,7 +92,7 @@ export default {
     const requestVerificationCode = async () => {
       if (isSubmitting.value || !isEmailValidForSubmit.value) return;
       isSubmitting.value = true;
-      backendError.value = ""; // 清除之前的后端错误
+      backendError.value = "";
       try {
         await axios.post(`${API_BASE_URL}/auth/request-verification`, { email: email.value });
         step.value = 2;
@@ -114,16 +114,16 @@ export default {
         return;
       }
       isSubmitting.value = true;
-      backendError.value = ""; // 清除之前的后端错误
+      backendError.value = "";
       try {
-        await axios.post(`${API_BASE_URL}/auth/register`, {
+        const response = await axios.post(`${API_BASE_URL}/auth/register`, {
           email: email.value,
           username: username.value,
           password: password.value,
           verificationCode: verificationCode.value
         });
-        login(); // 使用 useAuth 中的 login 方法更新登录状态
-        emit("register", { email: email.value, username: username.value });
+        const { token, userId } = response.data;
+        auth.handleLoginSuccess({ id: userId, email: email.value, username: username.value }, token);
       } catch (error) {
         console.error('注册失败:', error);
         backendError.value = error.response?.data?.message || "注册失败，请检查您的信息并重试";

@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, inject } from "vue";
 import axios from "axios";
 
 const API_BASE_URL = "http://192.168.128.179:3000";
@@ -43,6 +43,7 @@ export default {
     const grammarAnalysis = ref(null);
     const lockedSubtitleText = ref('');
     const lockedSubtitleId = ref('');
+    const { getToken, isLoggedIn } = inject('auth');
 
     const currentAnalysis = computed(() => {
       if (grammarAnalysis.value && lockedSubtitleId.value) {
@@ -77,6 +78,11 @@ export default {
     };
 
     const fetchGrammarAnalysis = async () => {
+      if (!isLoggedIn.value) {
+        console.error('用户未登录');
+        return;
+      }
+      
       const localData = getGrammarAnalysisFromLocalStorage();
       if (localData && localData[lockedSubtitleId.value]) {
         grammarAnalysis.value = localData;
@@ -84,10 +90,20 @@ export default {
       }
 
       try {
-        const response = await axios.post(`${API_BASE_URL}/analyze-grammar`, {
-          text: lockedSubtitleText.value,
-          subtitleId: lockedSubtitleId.value,
-        });
+        const token = getToken();
+        const response = await axios.post(
+          `${API_BASE_URL}/analyze-grammar`,
+          {
+            text: lockedSubtitleText.value,
+            subtitleId: lockedSubtitleId.value,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
         const newAnalysis = { [lockedSubtitleId.value]: response.data.analysis };
         grammarAnalysis.value = { ...grammarAnalysis.value, ...newAnalysis };
         setGrammarAnalysisToLocalStorage(newAnalysis);

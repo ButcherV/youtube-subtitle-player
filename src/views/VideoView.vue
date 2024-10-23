@@ -76,7 +76,7 @@ export default {
     const currentVideoId = ref("");
     const showVideoPlayer = ref(false);
     const isListView = ref(true);
-    const { isLoggedIn, showAuthModal } = inject('auth')
+    const auth = inject('auth');
 
     const carouselItems = ref([
       { 
@@ -205,8 +205,8 @@ export default {
 
 
     const handleCardClick = (url) => {
-      if (!isLoggedIn.value) {
-        showAuthModal();
+      if (!auth.isLoggedIn.value) {
+        auth.showAuthModal();
         return;
       }
       
@@ -215,6 +215,11 @@ export default {
     };
 
     const extractSubtitles = async (url) => {
+      if (!auth.isLoggedIn.value) {
+        auth.showAuthModal();
+        return;
+      }
+
       const targetUrl = url || userInputUrl.value;
       if (!targetUrl) {
         alert("请输入 YouTube 视频链接或选择一个预设视频");
@@ -259,9 +264,7 @@ export default {
         console.log("正在从服务器获取字幕，URL:", targetUrl);
         const response = await axios.post(
           `${API_BASE_URL}/extract-and-translate-subtitles`,
-          {
-            videoUrl: targetUrl,
-          }
+          { videoUrl: targetUrl }
         );
         console.log("收到响应:", response);
 
@@ -313,8 +316,6 @@ export default {
       closeVideoPlayer,
       isListView,
       toggleListView,
-      isLoggedIn,
-      showAuthModal,
     };
   },
 };

@@ -1,36 +1,77 @@
-// src/composables/useAuth.js
 import { ref, readonly } from "vue";
 
-export function useAuth() {
-  const isAuthModalVisible = ref(false);
-  const isLoggedIn = ref(false); // 简单示例，实际应从 cookie 或 API 获取
+const isAuthModalVisible = ref(false);
+const isLoggedIn = ref(false);
+const currentUser = ref(null);
+let routerInstance = null;
 
-  const showAuthModal = () => {
+const getToken = () => {
+  return localStorage.getItem('token');
+};
+
+const setLoggedIn = (user, token) => {
+  isLoggedIn.value = true;
+  currentUser.value = user;
+  localStorage.setItem('token', token);
+};
+
+const logout = () => {
+  isLoggedIn.value = false;
+  currentUser.value = null;
+  localStorage.removeItem('token');
+  if (routerInstance) routerInstance.push('/');
+};
+
+export const auth = {
+  isAuthModalVisible: readonly(isAuthModalVisible),
+  isLoggedIn: readonly(isLoggedIn),
+  currentUser: readonly(currentUser),
+
+  getToken,
+
+  showAuthModal: () => {
+    console.log('showAuthModal called, isAuthModalVisible before:', isAuthModalVisible.value);
     isAuthModalVisible.value = true;
-  };
+    console.log('showAuthModal called, isAuthModalVisible after:', isAuthModalVisible.value);
+  },
 
-  const hideAuthModal = () => {
+  hideAuthModal: () => {
     isAuthModalVisible.value = false;
-  };
+  },
 
-  const login = (/* 登录逻辑 */) => {
-    // 实现登录逻辑
-    isLoggedIn.value = true;
-    hideAuthModal();
-  };
+  setLoggedIn,
+  logout,
 
-  const register = (/* 注册逻辑 */) => {
-    // 实现注册逻辑
-    isLoggedIn.value = true;
-    hideAuthModal();
-  };
+  handleLoginSuccess: (user, token) => {
+    setLoggedIn(user, token);
+    isAuthModalVisible.value = false;
+    if (routerInstance) routerInstance.push('/');
+  },
 
-  return {
-    isAuthModalVisible: readonly(isAuthModalVisible),
-    isLoggedIn: readonly(isLoggedIn),
-    showAuthModal,
-    hideAuthModal,
-    login,
-    register,
-  };
+  checkAuth: () => {
+    const token = getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setLoggedIn({
+          id: payload.userId,
+          email: payload.email,
+          username: payload.username
+        }, token);
+      } catch (error) {
+        console.error('解析 token 失败', error);
+        logout();
+      }
+    } else {
+      logout();
+    }
+  },
+
+  setRouter: (router) => {
+    routerInstance = router;
+  }
+}
+
+export function useAuth() {
+  return auth;
 }

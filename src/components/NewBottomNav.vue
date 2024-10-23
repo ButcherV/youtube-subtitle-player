@@ -31,9 +31,11 @@
 <script setup>
 import { ref, onMounted, watch, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { inject } from 'vue';
 
 const router = useRouter();
 const route = useRoute();
+const auth = inject('auth');
 
 const navigationOptions = [
   {
@@ -108,6 +110,11 @@ const activeOption = ref(
 );
 
 const handleClick = (option) => {
+  if (option.route === '/words' || option.route === '/settings') {
+    if (!auth.isLoggedIn.value) {
+      return;
+    }
+  }
   activeOption.value = option.name;
   router.push(option.route);
   document.body.style.background = option.color;
@@ -121,6 +128,9 @@ watch(
       (option) => option.route === newPath
     )?.name;
     if (newActiveOption && newActiveOption !== activeOption.value) {
+      if ((newPath === '/words' || newPath === '/settings') && !auth.isLoggedIn.value) {
+        return; // 如果用户未登录，不更新 activeOption
+      }
       activeOption.value = newActiveOption;
       document.body.style.background = navigationOptions.find(
         (option) => option.name === newActiveOption

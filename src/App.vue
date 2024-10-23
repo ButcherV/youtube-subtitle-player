@@ -13,7 +13,7 @@
 <script>
 import { onMounted, onUnmounted, provide } from 'vue'
 import NewBottomNav from './components/NewBottomNav.vue'
-import { useAuth } from './composables/useAuth'
+import { auth } from './composables/useAuth'
 import AuthModal from './components/auth/AuthModal.vue'
 
 export default {
@@ -23,7 +23,6 @@ export default {
     AuthModal
   },
   setup() {
-    const auth = useAuth()
     provide('auth', auth)
 
     const setViewportHeight = () => {
@@ -43,7 +42,8 @@ export default {
     })
 
     return {
-      ...auth,
+      isAuthModalVisible: auth.isAuthModalVisible,
+      hideAuthModal: auth.hideAuthModal,
     }
   }
 }
