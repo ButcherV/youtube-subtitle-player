@@ -29,6 +29,7 @@ import { ref, watch, computed, inject } from "vue";
 import axios from "axios";
 
 const API_BASE_URL = "http://192.168.128.179:3000";
+const auth = inject('auth');
 
 export default {
   name: "SubtitleAnalysisPopup",
@@ -43,7 +44,6 @@ export default {
     const grammarAnalysis = ref(null);
     const lockedSubtitleText = ref('');
     const lockedSubtitleId = ref('');
-    const { getToken, isLoggedIn } = inject('auth');
 
     const currentAnalysis = computed(() => {
       if (grammarAnalysis.value && lockedSubtitleId.value) {
@@ -78,7 +78,7 @@ export default {
     };
 
     const fetchGrammarAnalysis = async () => {
-      if (!isLoggedIn.value) {
+      if (!auth.checkAuth()) {
         console.error('用户未登录');
         return;
       }
@@ -90,7 +90,7 @@ export default {
       }
 
       try {
-        const token = getToken();
+        const token = auth.getToken();
         const response = await axios.post(
           `${API_BASE_URL}/analyze-grammar`,
           {

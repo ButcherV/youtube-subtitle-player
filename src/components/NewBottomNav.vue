@@ -111,7 +111,7 @@ const activeOption = ref(
 
 const handleClick = (option) => {
   if (option.route === '/words' || option.route === '/settings') {
-    if (!auth.isLoggedIn.value) {
+    if (!auth.checkAuth()) {
       return;
     }
   }
@@ -128,7 +128,7 @@ watch(
       (option) => option.route === newPath
     )?.name;
     if (newActiveOption && newActiveOption !== activeOption.value) {
-      if ((newPath === '/words' || newPath === '/settings') && !auth.isLoggedIn.value) {
+      if ((newPath === '/words' || newPath === '/settings') && !auth.checkAuth()) {
         return; // 如果用户未登录，不更新 activeOption
       }
       activeOption.value = newActiveOption;

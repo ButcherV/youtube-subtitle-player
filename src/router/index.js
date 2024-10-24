@@ -40,9 +40,9 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {  
+router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!auth.isLoggedIn.value) {
+    if (!auth.checkAuth()) {  // 使用 checkAuth 方法
       auth.showAuthModal();
       next(false); // 阻止导航
     } else {

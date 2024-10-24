@@ -18,8 +18,8 @@
         </button>
       </div>
 
-      <LoginForm v-if="activeTab === 'login'" @login="handleLogin" />
-      <RegisterForm v-else @register="handleRegister" />
+      <LoginForm v-if="activeTab === 'login'" />
+      <RegisterForm v-else @register-success="handleRegisterSuccess" />
     </div>
   </div>
 </template>
@@ -32,19 +32,16 @@ import RegisterForm from "./RegisterForm.vue";
 export default {
   name: "AuthModal",
   components: { LoginForm, RegisterForm },
-  emits: ["close", "login", "register"],
-  setup(props, { emit }) {
+  emits: ["close"],
+  setup() {
     const activeTab = ref("login");
 
-    const handleLogin = (loginData) => {
-      emit("login", loginData);
+    const handleRegisterSuccess = (registerData) => {
+      console.log('handleRegisterSuccess', registerData);
+      activeTab.value = 'login';
     };
 
-    const handleRegister = (registerData) => {
-      emit("register", registerData);
-    };
-
-    return { activeTab, handleLogin, handleRegister };
+    return { activeTab, handleRegisterSuccess };
   },
 };
 </script>

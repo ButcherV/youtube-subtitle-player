@@ -37,15 +37,15 @@
 </template>
 
 <script>
-import { ref, inject } from "vue";
+import { ref } from "vue";
 import axios from 'axios';
 const API_BASE_URL = "http://192.168.128.179:3000";
 
 export default {
   name: "RegisterForm",
-  emits: ["register"],
-  setup() {
-    const auth = inject('auth');
+  emits: ["register-success"],
+  setup(props, { emit }) {
+    // const auth = inject('auth');
     const email = ref("");
     const verificationCode = ref("");
     const password = ref("");
@@ -116,14 +116,14 @@ export default {
       isSubmitting.value = true;
       backendError.value = "";
       try {
-        const response = await axios.post(`${API_BASE_URL}/auth/register`, {
+        await axios.post(`${API_BASE_URL}/auth/register`, {
           email: email.value,
           username: username.value,
           password: password.value,
           verificationCode: verificationCode.value
         });
-        const { token, userId } = response.data;
-        auth.handleLoginSuccess({ id: userId, email: email.value, username: username.value }, token);
+        // 注册成功，发出事件
+        emit('register-success', { email: email.value, username: username.value });
       } catch (error) {
         console.error('注册失败:', error);
         backendError.value = error.response?.data?.message || "注册失败，请检查您的信息并重试";

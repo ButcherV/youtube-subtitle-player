@@ -22,6 +22,28 @@ const logout = () => {
   if (routerInstance) routerInstance.push('/');
 };
 
+const checkToken = () => {
+  const token = getToken();
+  if (!token) {
+    logout();
+    return false;
+  }
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const now = Date.now().valueOf() / 1000;
+    if (typeof payload.exp !== 'undefined' && payload.exp < now) {
+      logout();
+      return false;
+    }
+    isLoggedIn.value = true;
+    return true;
+  } catch (error) {
+    console.error('解析 token 失败', error);
+    logout();
+    return false;
+  }
+};
+
 export const auth = {
   isAuthModalVisible: readonly(isAuthModalVisible),
   isLoggedIn: readonly(isLoggedIn),
@@ -49,22 +71,8 @@ export const auth = {
   },
 
   checkAuth: () => {
-    const token = getToken();
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setLoggedIn({
-          id: payload.userId,
-          email: payload.email,
-          username: payload.username
-        }, token);
-      } catch (error) {
-        console.error('解析 token 失败', error);
-        logout();
-      }
-    } else {
-      logout();
-    }
+    checkToken();
+    return isLoggedIn.value;
   },
 
   setRouter: (router) => {

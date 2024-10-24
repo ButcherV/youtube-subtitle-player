@@ -205,7 +205,7 @@ export default {
 
 
     const handleCardClick = (url) => {
-      if (!auth.isLoggedIn.value) {
+      if (!auth.checkAuth()) {
         auth.showAuthModal();
         return;
       }
@@ -215,7 +215,7 @@ export default {
     };
 
     const extractSubtitles = async (url) => {
-      if (!auth.isLoggedIn.value) {
+      if (!auth.checkAuth()) {
         auth.showAuthModal();
         return;
       }
