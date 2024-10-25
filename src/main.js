@@ -7,15 +7,29 @@ import {
   faPlus,
   faChevronUp,
   faChevronDown,
+  faRightFromBracket,
+  faRightToBracket
 } from "@fortawesome/free-solid-svg-icons";
+import 'element-plus/dist/index.css'
 import router from "./router";
 import "./assets/styles/main.scss";
 import { auth } from './composables/useAuth'
 import axios from 'axios';
+import ElementPlus from 'element-plus'
+import { ElMessage } from 'element-plus'
+import 'element-plus/dist/index.css'
 
-library.add(faArrowLeft, faPlus, faChevronUp, faChevronDown);
+library.add(
+  faArrowLeft, 
+  faPlus, 
+  faChevronUp, 
+  faChevronDown,
+  faRightFromBracket,
+  faRightToBracket
+);
 
 const app = createApp(App);
+app.config.globalProperties.$message = ElMessage
 auth.setRouter(router);
 
 // 设置 Axios 拦截器
@@ -43,4 +57,6 @@ app.component("font-awesome-icon", FontAwesomeIcon);
 
 auth.checkAuth();
 app.provide('auth', auth);
+app.use(ElementPlus)
+
 app.mount("#app");

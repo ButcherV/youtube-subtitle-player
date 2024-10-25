@@ -2,7 +2,21 @@
   <div class="video-view-container">
     <div class="info-card" v-if="!showVideoPlayer">
       <div>
-        <p class="info-card-title">Hi, Xiaowei</p>
+        <div class="info-card-title-wrapper">
+          <p class="info-card-title">Hi, Xiaowei</p>
+          <font-awesome-icon
+            v-if="isLoggedIn"
+            :icon="['fas', 'right-from-bracket']" 
+            @click="handleLogout" 
+            class="log-btn" 
+          />
+          <font-awesome-icon
+            v-else
+            :icon="['fas', 'fa-right-to-bracket']" 
+            @click="auth.showAuthModal" 
+            class="log-btn" 
+          />
+        </div>
         <p class="info-card-subtitle">本日视频引入时长：13 分</p>
         <p class="info-card-subtitle">本月时长配额：2 小时 23 分 / 5 小时</p>
       </div>
@@ -52,12 +66,13 @@
 </template>
 
 <script>
-import { ref, inject } from "vue";
+import { ref, inject, getCurrentInstance, computed } from "vue";
 import axios from "axios";
 import VideoPlayer from "../components/VideoPlayer.vue";
 import { extractVideoId } from "../utils/youtubeUtils";
 import CarouselCard from '@/components/CarouselCard.vue';
 import VideoList from '@/components/VideoList.vue';
+import { SUCCESS_KEYS, ERROR_KEYS, getSuccessMessage, getErrorMessage } from '@/constants/errorKeys';
 
 const API_BASE_URL = "http://192.168.128.179:3000";
 
@@ -77,6 +92,9 @@ export default {
     const showVideoPlayer = ref(false);
     const isListView = ref(true);
     const auth = inject('auth');
+    const { proxy } = getCurrentInstance();
+
+    const isLoggedIn = computed(() => auth.isLoggedIn.value);
 
     const carouselItems = ref([
       { 
@@ -302,6 +320,21 @@ export default {
       showVideoPlayer.value = false;
     };
 
+    const handleLogout = async () => {
+      try {
+        const response = await axios.post(`${API_BASE_URL}/auth/logout`);
+        if (response.data.success === SUCCESS_KEYS.LOGOUT_SUCCESS) {
+          auth.logout();
+          proxy.$message.success(getSuccessMessage(SUCCESS_KEYS.LOGOUT_SUCCESS));
+        }
+      } catch (error) {
+        const errorMessage = error.response?.data?.error
+          ? getErrorMessage(error.response.data.error)
+          : getErrorMessage(ERROR_KEYS.LOGOUT_FAILED);
+        proxy.$message.error(errorMessage);
+      }
+    };
+
     return {
       userInputUrl,
       currentVideoUrl,
@@ -316,6 +349,9 @@ export default {
       closeVideoPlayer,
       isListView,
       toggleListView,
+      handleLogout,
+      auth,
+      isLoggedIn,
     };
   },
 };
@@ -450,6 +486,17 @@ export default {
 .slide-left-enter-to,
 .slide-left-leave-from {
   transform: translateX(0);
+}
+
+.log-btn {
+  color: white;
+  font-size: 24px;
+}
+
+.info-card-title-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 </style>

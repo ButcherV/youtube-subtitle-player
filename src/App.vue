@@ -48,7 +48,7 @@ export default {
   }
 }
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 
 .app-container {
   font-family: Avenir, Helvetica, Arial, sans-serif;

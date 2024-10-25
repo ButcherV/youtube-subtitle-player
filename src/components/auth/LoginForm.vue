@@ -4,16 +4,17 @@
     <input v-model="password" type="password" placeholder="密码" required class="auth-input" />
     <p v-if="error" class="error-message">{{ error }}</p>
     <button type="submit" class="auth-button" :disabled="isLoading">
-      {{ isLoading ? '登录中...' : '登录' }}
+      {{ isLoading ? getSuccessMessage(SUCCESS_KEYS.REGISTERING) : '登录' }}
     </button>
   </form>
 </template>
 
 <script>
-import { ref, inject } from "vue";
+import { ref, inject, getCurrentInstance } from "vue";
 import axios from 'axios';
+import { ERROR_KEYS, getErrorMessage, SUCCESS_KEYS, getSuccessMessage } from '@/constants/errorKeys';
 
-const API_BASE_URL = "http://192.168.128.179:3000"; // 请确保这是正确的后端 URL
+const API_BASE_URL = "http://192.168.128.179:3000";
 
 export default {
   name: "LoginForm",
@@ -23,6 +24,7 @@ export default {
     const password = ref("");
     const error = ref("");
     const isLoading = ref(false);
+    const { proxy } = getCurrentInstance();
 
     const handleSubmit = async () => {
       error.value = "";
@@ -35,14 +37,29 @@ export default {
         const { token, userId, email: userEmail } = response.data;
         
         auth.handleLoginSuccess({ id: userId, email: userEmail }, token);
+        proxy.$message.success(getSuccessMessage(SUCCESS_KEYS.LOGIN_SUCCESS));
       } catch (err) {
-        error.value = err.response?.data?.message || "登录失败，请稍后重试";
+        const errorKey = err.response?.data?.error;
+        if (errorKey) {
+          error.value = getErrorMessage(errorKey);
+        } else {
+          error.value = getErrorMessage(ERROR_KEYS.LOGIN_FAILED);
+        }
+        proxy.$message.error(error.value);
       } finally {
         isLoading.value = false;
       }
     };
 
-    return { email, password, handleSubmit, error, isLoading };
+    return { 
+      email, 
+      password, 
+      handleSubmit, 
+      error, 
+      isLoading,
+      getSuccessMessage,
+      SUCCESS_KEYS
+    };
   },
 };
 </script>
@@ -76,5 +93,12 @@ export default {
 
 .auth-button:hover {
   background-color: #45a049;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+  text-align: center;
 }
 </style>

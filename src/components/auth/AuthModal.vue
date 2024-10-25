@@ -1,33 +1,36 @@
 <template>
-  <div class="auth-modal">
-    <div class="modal-content">
-      <button class="close-btn" @click="$emit('close')">&times;</button>
+  <Teleport to="body">
+    <div class="auth-modal">
+      <div class="modal-content">
+        <button class="close-btn" @click="$emit('close')">&times;</button>
 
-      <div class="tabs">
-        <button
-          :class="{ 'tab-button': true, active: activeTab === 'login' }"
-          @click="activeTab = 'login'"
-        >
-          登录
-        </button>
-        <button
-          :class="{ 'tab-button': true, active: activeTab === 'register' }"
-          @click="activeTab = 'register'"
-        >
-          注册
-        </button>
+        <div class="tabs">
+          <button
+            :class="{ 'tab-button': true, active: activeTab === 'login' }"
+            @click="activeTab = 'login'"
+          >
+            登录
+          </button>
+          <button
+            :class="{ 'tab-button': true, active: activeTab === 'register' }"
+            @click="activeTab = 'register'"
+          >
+            注册
+          </button>
+        </div>
+
+        <LoginForm v-if="activeTab === 'login'" />
+        <RegisterForm v-else @register-success="handleRegisterSuccess" />
       </div>
-
-      <LoginForm v-if="activeTab === 'login'" />
-      <RegisterForm v-else @register-success="handleRegisterSuccess" />
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, getCurrentInstance } from "vue";
 import LoginForm from "./LoginForm.vue";
 import RegisterForm from "./RegisterForm.vue";
+import { SUCCESS_KEYS, getSuccessMessage } from '@/constants/errorKeys';
 
 export default {
   name: "AuthModal",
@@ -35,9 +38,10 @@ export default {
   emits: ["close"],
   setup() {
     const activeTab = ref("login");
+    const { proxy } = getCurrentInstance();
 
-    const handleRegisterSuccess = (registerData) => {
-      console.log('handleRegisterSuccess', registerData);
+    const handleRegisterSuccess = () => {
+      proxy.$message.success(getSuccessMessage(SUCCESS_KEYS.REGISTRATION_SUCCESS));
       activeTab.value = 'login';
     };
 
@@ -46,7 +50,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .auth-modal {
   position: fixed;
   top: 0;
@@ -57,7 +61,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999999999;
+  z-index: $zIndexModal;
 }
 
 .modal-content {

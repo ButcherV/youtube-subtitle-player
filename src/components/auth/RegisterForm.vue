@@ -30,22 +30,22 @@
       <input v-model="confirmPassword" type="password" placeholder="确认密码" required class="auth-input" />
       <p v-if="backendError" class="error-message">{{ backendError }}</p>
       <button type="submit" class="auth-button" :disabled="isSubmitting || !isUsernameValid">
-        {{ isSubmitting ? '注册中...' : '完成注册' }}
+        {{ isSubmitting ? submittingText : submitText }}
       </button>
     </template>
   </form>
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, getCurrentInstance, computed } from "vue";
 import axios from 'axios';
+import { ERROR_KEYS, getErrorMessage, SUCCESS_KEYS, getSuccessMessage } from '@/constants/errorKeys';
 const API_BASE_URL = "http://192.168.128.179:3000";
 
 export default {
   name: "RegisterForm",
   emits: ["register-success"],
   setup(props, { emit }) {
-    // const auth = inject('auth');
     const email = ref("");
     const verificationCode = ref("");
     const password = ref("");
@@ -59,14 +59,18 @@ export default {
     const usernameError = ref("");
     const isUsernameValid = ref(false);
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const usernameRegex = /^[\w!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{1,15}$/;
+    const { proxy } = getCurrentInstance();
+
+    const submitText = computed(() => getSuccessMessage(SUCCESS_KEYS.COMPLETE_REGISTRATION));
+    const submittingText = computed(() => getSuccessMessage(SUCCESS_KEYS.REGISTERING));
 
     const validateUsername = () => {
-      const usernameRegex = /^[a-zA-Z]{1,15}$/;
       if (!username.value) {
-        usernameError.value = "用户名不能为空";
+        usernameError.value = getErrorMessage(ERROR_KEYS.REQUIRED_FIELD_MISSING);
         isUsernameValid.value = false;
       } else if (!usernameRegex.test(username.value)) {
-        usernameError.value = "用户名必须是1-15个英文字符";
+        usernameError.value = getErrorMessage(ERROR_KEYS.INVALID_USERNAME_FORMAT);
         isUsernameValid.value = false;
       } else {
         usernameError.value = "";
@@ -76,12 +80,12 @@ export default {
 
     const validateEmailOnInput = () => {
       isEmailValidForSubmit.value = emailRegex.test(email.value);
-      emailError.value = ""; // 清除任何现有的错误消息
+      emailError.value = "";
     };
 
     const validateEmailOnBlur = () => {
       if (email.value && !emailRegex.test(email.value)) {
-        emailError.value = "请输入有效的邮箱地址";
+        emailError.value = getErrorMessage(ERROR_KEYS.INVALID_EMAIL_FORMAT);
         isEmailValidForSubmit.value = false;
       } else {
         emailError.value = "";
@@ -96,9 +100,12 @@ export default {
       try {
         await axios.post(`${API_BASE_URL}/auth/request-verification`, { email: email.value });
         step.value = 2;
+        proxy.$message.success(getSuccessMessage(SUCCESS_KEYS.VERIFICATION_CODE_SENT));
       } catch (error) {
         console.error('请求验证码失败:', error);
-        backendError.value = error.response?.data?.message || "发送验证码失败，请稍后重试";
+        const errorKey = error.response?.data?.error || ERROR_KEYS.INTERNAL_SERVER_ERROR;
+        backendError.value = getErrorMessage(errorKey);
+        // proxy.$message.error(backendError.value);
       } finally {
         isSubmitting.value = false;
       }
@@ -106,11 +113,11 @@ export default {
 
     const registerUser = async () => {
       if (password.value !== confirmPassword.value) {
-        backendError.value = "密码不匹配";
+        backendError.value = getErrorMessage(ERROR_KEYS.PASSWORDS_DO_NOT_MATCH);
         return;
       }
       if (!isUsernameValid.value) {
-        backendError.value = "请输入有效的用户名";
+        backendError.value = getErrorMessage(ERROR_KEYS.INVALID_USERNAME_FORMAT);
         return;
       }
       isSubmitting.value = true;
@@ -122,11 +129,11 @@ export default {
           password: password.value,
           verificationCode: verificationCode.value
         });
-        // 注册成功，发出事件
-        emit('register-success', { email: email.value, username: username.value });
+        emit('register-success');
       } catch (error) {
         console.error('注册失败:', error);
-        backendError.value = error.response?.data?.message || "注册失败，请检查您的信息并重试";
+        const errorKey = error.response?.data?.error || ERROR_KEYS.REGISTRATION_FAILED;
+        proxy.$message.error(getErrorMessage(errorKey));
       } finally {
         isSubmitting.value = false;
       }
@@ -144,7 +151,9 @@ export default {
       email, verificationCode, password, confirmPassword, 
       step, isSubmitting, handleSubmit, validateEmailOnInput,
       validateEmailOnBlur, isEmailValidForSubmit, emailError, backendError,
-      username, validateUsername, usernameError, isUsernameValid
+      username, validateUsername, usernameError, isUsernameValid,
+      submitText,
+      submittingText
     };
   },
 };
