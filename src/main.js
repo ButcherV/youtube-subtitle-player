@@ -10,7 +10,6 @@ import {
   faRightFromBracket,
   faRightToBracket
 } from "@fortawesome/free-solid-svg-icons";
-import 'element-plus/dist/index.css'
 import router from "./router";
 import "./assets/styles/main.scss";
 import { auth } from './composables/useAuth'

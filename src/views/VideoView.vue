@@ -3,12 +3,12 @@
     <div class="info-card" v-if="!showVideoPlayer">
       <div>
         <div class="info-card-title-wrapper">
-          <p class="info-card-title">Hi, Xiaowei</p>
+          <p class="info-card-title">Hi, {{ userProfile.username || 'Guest' }}</p>
           <font-awesome-icon
             v-if="isLoggedIn"
             :icon="['fas', 'right-from-bracket']" 
             @click="handleLogout" 
-            class="log-btn" 
+            class="log-btn"
           />
           <font-awesome-icon
             v-else
@@ -66,7 +66,7 @@
 </template>
 
 <script>
-import { ref, inject, getCurrentInstance, computed } from "vue";
+import { ref, inject, getCurrentInstance, computed, onMounted, watch } from "vue";
 import axios from "axios";
 import VideoPlayer from "../components/VideoPlayer.vue";
 import { extractVideoId } from "../utils/youtubeUtils";
@@ -85,6 +85,7 @@ export default {
   },
   setup() {
     const userInputUrl = ref("");
+    const userProfile = ref({});
     const currentVideoUrl = ref("");
     const subtitles = ref([]);
     const meta = ref({});
@@ -139,88 +140,11 @@ export default {
         videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
         videoPlatform: 'youtube'
       },
-      { 
-        title: "Pink Floyd Another Brick In The Wall (HQ)", 
-        duration: '06:00',
-        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: "Pink Floyd Another Brick In The Wall (HQ)", 
-        duration: '06:00',
-        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: "Pink Floyd Another Brick In The Wall (HQ)", 
-        duration: '06:00',
-        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: "Pink Floyd Another Brick In The Wall (HQ)", 
-        duration: '06:00',
-        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: "Pink Floyd Another Brick In The Wall (HQ)", 
-        duration: '06:00',
-        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
-        videoPlatform: 'youtube'
-      },      { 
-        title: "Pink Floyd Another Brick In The Wall (HQ)", 
-        duration: '06:00',
-        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: "Pink Floyd Another Brick In The Wall (HQ)", 
-        duration: '06:00',
-        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: "Pink Floyd Another Brick In The Wall (HQ)", 
-        duration: '06:00',
-        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: "Pink Floyd Another Brick In The Wall (HQ)", 
-        duration: '06:00',
-        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: "Pink Floyd Another Brick In The Wall (HQ)", 
-        duration: '06:00',
-        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: "Pink Floyd Another Brick In The Wall (HQ)", 
-        duration: '06:00',
-        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
-        videoPlatform: 'youtube'
-      },
     ]);
 
     const toggleListView = () => {
       isListView.value = !isListView.value;
     };
-
 
     const handleCardClick = (url) => {
       if (!auth.checkAuth()) {
@@ -325,6 +249,7 @@ export default {
         const response = await axios.post(`${API_BASE_URL}/auth/logout`);
         if (response.data.success === SUCCESS_KEYS.LOGOUT_SUCCESS) {
           auth.logout();
+          userProfile.value = {};
           proxy.$message.success(getSuccessMessage(SUCCESS_KEYS.LOGOUT_SUCCESS));
         }
       } catch (error) {
@@ -334,6 +259,30 @@ export default {
         proxy.$message.error(errorMessage);
       }
     };
+
+    const fetchUserProfile = async () => {
+      if (isLoggedIn.value) {
+        try {
+          const response = await axios.get(`${API_BASE_URL}/user/profile`);
+          userProfile.value = response.data.user;
+        } catch (error) {
+          const errorMessage = error.response?.data?.error
+          proxy.$message.error(getErrorMessage(errorMessage));
+        }
+      }
+    };
+
+    onMounted(() => {
+      fetchUserProfile();
+    });
+
+    watch(() => auth.isLoggedIn.value, (newValue) => {
+      if (newValue) {
+        fetchUserProfile();
+      } else {
+        userProfile.value = {};
+      }
+    });
 
     return {
       userInputUrl,
@@ -352,6 +301,7 @@ export default {
       handleLogout,
       auth,
       isLoggedIn,
+      userProfile,
     };
   },
 };
