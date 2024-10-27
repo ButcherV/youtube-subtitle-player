@@ -52,9 +52,7 @@ export const auth = {
   getToken,
 
   showAuthModal: () => {
-    console.log('showAuthModal called, isAuthModalVisible before:', isAuthModalVisible.value);
     isAuthModalVisible.value = true;
-    console.log('showAuthModal called, isAuthModalVisible after:', isAuthModalVisible.value);
   },
 
   hideAuthModal: () => {

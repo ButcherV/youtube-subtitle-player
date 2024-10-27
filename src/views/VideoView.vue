@@ -1,6 +1,6 @@
 <template>
   <div class="video-view-container">
-    <div class="info-card" v-if="!showVideoPlayer">
+    <div class="info-card">
       <div>
         <div class="info-card-title-wrapper">
           <p class="info-card-title">Hi, {{ userProfile.username || 'Guest' }}</p>
@@ -26,26 +26,17 @@
           v-model="userInputUrl"
           placeholder="输入 YouTube 视频链接"
         />
-        <button class="info-card-add-button" @click="extractSubtitles(userInputUrl)">
+        <button class="info-card-add-button" @click="addVideoToHistory(userInputUrl)">
           <font-awesome-icon icon="plus" />
         </button>
       </div>
     </div>
-    <div class="card-wrapper" v-if="!showVideoPlayer">
+    <div class="card-wrapper">
       <div class="card-info">
         <p class="card-info-title">#History</p>
-        <div class="card-info-subtitle" @click="toggleListView">
-          <font-awesome-icon :icon="isListView ? 'chevron-up' : 'chevron-down'" />
-        </div>
       </div>
-      <CarouselCard
-        v-if="!isListView"
-        :items="carouselItems" 
-        @cardClick="handleCardClick"
-      />
       <VideoList
-        v-else
-        :items="carouselItems"
+        :items="historyItems"
         @itemClick="handleCardClick"
       />
     </div>
@@ -57,7 +48,6 @@
           :videoId="currentVideoId"
           :subtitles="subtitles"
           :meta="meta"
-          @timeupdate="handleTimeUpdate"
           :onClose="closeVideoPlayer"
         />
       </Transition>
@@ -70,7 +60,6 @@ import { ref, inject, getCurrentInstance, computed, onMounted, watch } from "vue
 import axios from "axios";
 import VideoPlayer from "../components/VideoPlayer.vue";
 import { extractVideoId } from "../utils/youtubeUtils";
-import CarouselCard from '@/components/CarouselCard.vue';
 import VideoList from '@/components/VideoList.vue';
 import { SUCCESS_KEYS, ERROR_KEYS, getSuccessMessage, getErrorMessage } from '@/constants/errorKeys';
 
@@ -80,7 +69,6 @@ export default {
   name: "VideoView",
   components: {
     VideoPlayer,
-    CarouselCard,
     VideoList
   },
   setup() {
@@ -91,153 +79,74 @@ export default {
     const meta = ref({});
     const currentVideoId = ref("");
     const showVideoPlayer = ref(false);
-    const isListView = ref(true);
     const auth = inject('auth');
     const { proxy } = getCurrentInstance();
 
     const isLoggedIn = computed(() => auth.isLoggedIn.value);
 
-    const carouselItems = ref([
-      { 
-        title: 'Scent of a Woman | "I\'ll Show You Out of Order!"', 
-        coverAddress: 'https://img.youtube.com/vi/Jd10x8LiuBc/sddefault.jpg',
-        duration: '05:38',
-        videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: 'Morgan Freeman Red Misses Andy Dufresne - The Shawshank Redemption (1994)', 
-        duration: '01:51',
-        coverAddress: 'https://img.youtube.com/vi/mgwZr0r_yF0/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=mgwZr0r_yF0',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: 'Queen – Bohemian Rhapsody (Official Video Remastered)', 
-        duration: '05:59',
-        coverAddress: 'https://img.youtube.com/vi/fJ9rUzIMcZQ/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=fJ9rUzIMcZQ',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: 'U.S.A. For Africa - We Are the World"', 
-        duration: '07:11',
-        coverAddress: 'https://img.youtube.com/vi/9AjkUyX0rVw/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=9AjkUyX0rVw',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: "Robin Williams' Speech | Good Will Hunting | Max", 
-        duration: '05:00',
-        coverAddress: 'https://img.youtube.com/vi/8GY3sO47YYo/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=8GY3sO47YYo',
-        videoPlatform: 'youtube'
-      },
-      { 
-        title: "Pink Floyd Another Brick In The Wall (HQ)", 
-        duration: '06:00',
-        coverAddress: 'https://img.youtube.com/vi/bZwxTX2pWmw/sddefault.jpg', 
-        videoUrl: 'https://www.youtube.com/watch?v=bZwxTX2pWmw',
-        videoPlatform: 'youtube'
-      },
+    const historyItems = ref([
+      // { 
+      //   title: 'Scent of a Woman | "I\'ll Show You Out of Order!"', 
+      //   coverAddress: 'https://img.youtube.com/vi/Jd10x8LiuBc/sddefault.jpg',
+      //   duration: '05:38',
+      //   videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc',
+      //   videoPlatform: 'youtube'
+      // },
     ]);
 
-    const toggleListView = () => {
-      isListView.value = !isListView.value;
-    };
-
-    const handleCardClick = (url) => {
-      if (!auth.checkAuth()) {
-        auth.showAuthModal();
-        return;
-      }
-      
-      currentVideoUrl.value = url;
-      extractSubtitles(url);
-    };
-
-    const extractSubtitles = async (url) => {
-      if (!auth.checkAuth()) {
+    const addVideoToHistory = async (url) => {
+      if (!isLoggedIn.value) {
         auth.showAuthModal();
         return;
       }
 
-      const targetUrl = url || userInputUrl.value;
-      if (!targetUrl) {
-        alert("请输入 YouTube 视频链接或选择一个预设视频");
-        return;
-      }
-
-      currentVideoUrl.value = targetUrl;
-      const videoId = extractVideoId(targetUrl);
-      currentVideoId.value = videoId;
-
+      const videoId = extractVideoId(url);
       if (!videoId) {
-        alert("无效的 YouTube 链接");
+        proxy.$message.error("无效的 YouTube 链接");
         return;
       }
 
-      // 首先检查 localStorage
-      const storedData = localStorage.getItem(videoId);
-      if (storedData) {
-        try {
-          const parsedData = JSON.parse(storedData);
-          if (parsedData.subtitles) {
-            subtitles.value = parsedData.subtitles;
-            meta.value = parsedData.metadata;
-            console.log("从 localStorage 加载字幕数据");
-            showVideoPlayer.value = true;
-            return;
-          }
-        } catch (error) {
-          console.error("解析存储的字幕数据时出错:", error);
-          // 如果解析失败，继续从服务器获取
-        }
-      }
-
-      // 如果没有缓存，显示确认对话框
-      const userConfirmed = await showConfirmDialog();
-      if (!userConfirmed) {
-        console.log("用户取消了字幕提取");
-        return;
-      }
+      const newItem = {
+        id: videoId,
+        url: url,
+        title: "加载中...",
+        coverAddress: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
+        duration: "加载中",
+        status: "loading"
+      };
+      
+      historyItems.value.unshift(newItem);
 
       try {
-        console.log("正在从服务器获取字幕，URL:", targetUrl);
-        const response = await axios.post(
-          `${API_BASE_URL}/extract-and-translate-subtitles`,
-          { videoUrl: targetUrl }
-        );
-        console.log("收到响应:", response);
+        const response = await axios.post(`${API_BASE_URL}/process-video`, { videoUrl: url });
+        
+        if (response.data && response.data.meta && response.data.subtitle) {
+          const { meta, subtitle } = response.data;
+          
+          // 更新历史记录项
+          updateHistoryItem(videoId, {
+            title: meta.title,
+            duration: meta.duration,
+            status: "ready"
+          });
 
-        if (response.data && response.data.subtitles) {
-          subtitles.value = response.data.subtitles;
-          meta.value = response.data.metadata;
-          console.log("解析和翻译后的字幕:", subtitles.value);
-          localStorage.setItem(videoId, JSON.stringify(response.data));
-          showVideoPlayer.value = true;
+          // 存储完整的视频数据到 localStorage
+          localStorage.setItem(videoId, JSON.stringify({ meta, subtitle }));
         } else {
-          throw new Error("无效的字幕数据");
+          throw new Error("处理视频失败：返回数据格式不正确");
         }
       } catch (error) {
-        console.error("提取字幕时出错:", error);
-        if (error.response) {
-          console.error("响应数据:", error.response.data);
-          console.error("响应状态:", error.response.status);
-        }
-        alert("提取字幕时出错，请检查视频链接或稍后重试");
+        console.error("处理视频时出错:", error);
+        updateHistoryItem(videoId, { status: "error" });
+        proxy.$message.error("处理视频失败，请稍后重试");
       }
     };
 
-    const showConfirmDialog = () => {
-      return new Promise((resolve) => {
-        const result = window.confirm("首次处理字幕，是否同意继续？");
-        resolve(result);
-      });
-    };
-
-    const handleTimeUpdate = () => {
-      // 可以在这里添加额外的逻辑，如果需要的话
+    const updateHistoryItem = (videoId, updates) => {
+      const index = historyItems.value.findIndex(item => item.id === videoId);
+      if (index !== -1) {
+        historyItems.value[index] = { ...historyItems.value[index], ...updates };
+      }
     };
 
     const closeVideoPlayer = () => {
@@ -289,19 +198,18 @@ export default {
       currentVideoUrl,
       subtitles,
       meta,
-      extractSubtitles,
-      handleTimeUpdate,
       currentVideoId,
-      carouselItems,
+      historyItems,
       handleCardClick,
       showVideoPlayer,
       closeVideoPlayer,
-      isListView,
-      toggleListView,
       handleLogout,
       auth,
       isLoggedIn,
       userProfile,
+      addVideoToHistory,
+      // isListView,
+      // toggleListView,
     };
   },
 };
