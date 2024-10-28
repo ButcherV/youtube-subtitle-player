@@ -28,9 +28,7 @@
     />
     <SubtitleAnalysisPopup
       :is-active="isLooping"
-      :video-id="videoId"
-      :current-subtitle-id="currentSubtitleId"
-      :current-subtitle-text="currentSubtitleText"
+      :subtitle="currentSubtitle"
       @close="stopLooping"
     />
   </div>
@@ -168,14 +166,6 @@ export default {
       );
     });
 
-    const currentSubtitleText = computed(() => {
-      return currentSubtitle.value ? currentSubtitle.value.originText : '';
-    });
-
-    const currentSubtitleId = computed(() => {
-      return currentSubtitle.value ? currentSubtitle.value.id : null;
-    });
-
     watch(isPlaying, (newValue) => {
       if (newValue) {
         const interval = setInterval(() => {
@@ -202,8 +192,7 @@ export default {
       seek,
       seekToSubtitle,
       toggleLoop,
-      currentSubtitleText,
-      currentSubtitleId,
+      currentSubtitle,
       stopLooping,
       closePlayer,
     };
