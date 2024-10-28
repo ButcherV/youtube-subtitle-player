@@ -35,12 +35,9 @@
       <div class="card-info">
         <p class="card-info-title">#History</p>
       </div>
-      <!-- <VideoList
-        :items="historyItems"
-        @itemClick="handleCardClick"
-      /> -->
       <VideoList
         :items="historyItems"
+        @itemClick="handleCardClick"
       />
     </div>
     <Teleport to="body">
@@ -222,6 +219,22 @@ export default {
       }
     };
 
+    const handleCardClick = (item) => {
+      // 从 localStorage 获取完整数据
+      const fullData = JSON.parse(localStorage.getItem(item.id));
+      if (!fullData) {
+        proxy.$message.error("视频数据不完整，请重试");
+        return;
+      }
+
+      // 设置播放器所需的数据
+      currentVideoId.value = item.id;
+      currentVideoUrl.value = `https://www.youtube.com/watch?v=${item.id}`;
+      meta.value = fullData.meta;
+      subtitles.value = fullData.subtitles;
+      showVideoPlayer.value = true;
+    };
+
     return {
       userInputUrl,
       currentVideoUrl,
@@ -229,7 +242,7 @@ export default {
       meta,
       currentVideoId,
       historyItems,
-      // handleCardClick,
+      handleCardClick,
       showVideoPlayer,
       closeVideoPlayer,
       handleLogout,
