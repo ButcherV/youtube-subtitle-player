@@ -1,20 +1,23 @@
 <template>
   <div class="list-view">
     <div
-      v-for="(item, index) in items"
-      :key="index"
+      v-for="item in items"
+      :key="item.id"
       class="list-item"
-      @click="$emit('itemClick', item.videoUrl)"
+      :class="{ 'loading': item.status !== 'ready' }"
+      @click="handleItemClick(item)"
     >
-      <img class="list-item-cover" :src="item.coverAddress" alt="Cover" />
+      <img 
+        class="list-item-cover" 
+        :src="item.coverAddress" 
+        alt="Cover" 
+      />
       <div class="list-item-info">
         <h3 class="list-item-title">{{ item.title }}</h3>
-        <p class="list-item-duration">{{ item.duration }}</p>
-        <div
-          v-if="item.videoPlatform"
-          class="list-item-platform"
-          :class="item.videoPlatform"
-        ></div>
+        <p class="list-item-duration">{{ formatDuration(item.duration) }}</p>
+      </div>
+      <div v-if="item.status !== 'ready'" class="status-indicator">
+        {{ getStatusText(item.status) }}
       </div>
     </div>
   </div>
@@ -29,7 +32,30 @@ export default {
       required: true,
     },
   },
-  emits: ["itemClick"],
+  methods: {
+    handleItemClick(item) {
+      if (item.status !== 'ready') {
+        return;
+      }
+      this.$emit('itemClick', item);
+    },
+    getStatusText(status) {
+      switch (status) {
+        case 'loading':
+          return '处理中...';
+        case 'error':
+          return '处理失败';
+        default:
+          return '加载中...';
+      }
+    },
+    formatDuration(seconds) {
+      if (!seconds) return '';
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+  }
 };
 </script>
 
@@ -105,5 +131,23 @@ export default {
     font-size: 14px;
     font-weight: bold;
   }
+}
+
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
+}
+
+.status-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
 }
 </style>

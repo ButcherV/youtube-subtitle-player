@@ -35,9 +35,12 @@
       <div class="card-info">
         <p class="card-info-title">#History</p>
       </div>
-      <VideoList
+      <!-- <VideoList
         :items="historyItems"
         @itemClick="handleCardClick"
+      /> -->
+      <VideoList
+        :items="historyItems"
       />
     </div>
     <Teleport to="body">
@@ -87,10 +90,9 @@ export default {
     const historyItems = ref([
       // { 
       //   title: 'Scent of a Woman | "I\'ll Show You Out of Order!"', 
-      //   coverAddress: 'https://img.youtube.com/vi/Jd10x8LiuBc/sddefault.jpg',
+      //   coverAddress: 'https://img.youtube.com/vi/Jd10x8LiuBc/mqdefault.jpg',
       //   duration: '05:38',
       //   videoUrl: 'https://www.youtube.com/watch?v=Jd10x8LiuBc',
-      //   videoPlatform: 'youtube'
       // },
     ]);
 
@@ -106,48 +108,87 @@ export default {
         return;
       }
 
-      const newItem = {
+      // 先添加一个加载状态的项
+      historyItems.value.unshift({
         id: videoId,
-        url: url,
         title: "加载中...",
-        coverAddress: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
+        coverAddress: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
         duration: "加载中",
         status: "loading"
-      };
-      
-      historyItems.value.unshift(newItem);
+      });
 
       try {
         const response = await axios.post(`${API_BASE_URL}/process-video`, { videoUrl: url });
+        if (response.data && response.data.meta) {
+          const { meta, subtitles } = response.data;
         
-        if (response.data && response.data.meta && response.data.subtitle) {
-          const { meta, subtitle } = response.data;
-          
-          // 更新历史记录项
-          updateHistoryItem(videoId, {
-            title: meta.title,
-            duration: meta.duration,
-            status: "ready"
-          });
+          // 更新历史记录中的项
+          const index = historyItems.value.findIndex(item => item.id === videoId);
+          if (index !== -1) {
+            historyItems.value[index] = {
+              id: videoId,
+              title: meta.videoTitle,
+              coverAddress: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+              duration: meta.videoDuration,
+              status: "ready"
+            };
+          }
 
-          // 存储完整的视频数据到 localStorage
-          localStorage.setItem(videoId, JSON.stringify({ meta, subtitle }));
-        } else {
-          throw new Error("处理视频失败：返回数据格式不正确");
+          // 存储完整数据到 localStorage
+          localStorage.setItem(videoId, JSON.stringify({ meta, subtitles }));
+
+          // 清空输入框
+          userInputUrl.value = "";
         }
       } catch (error) {
-        console.error("处理视频时出错:", error);
-        updateHistoryItem(videoId, { status: "error" });
+        console.error("处理视频失败:", error);
+        const index = historyItems.value.findIndex(item => item.id === videoId);
+        if (index !== -1) {
+          historyItems.value[index].status = "error";
+        }
         proxy.$message.error("处理视频失败，请稍后重试");
       }
     };
 
-    const updateHistoryItem = (videoId, updates) => {
-      const index = historyItems.value.findIndex(item => item.id === videoId);
-      if (index !== -1) {
-        historyItems.value[index] = { ...historyItems.value[index], ...updates };
+    const fetchHistoryList = async () => {
+      try {
+        const response = await axios.post(`${API_BASE_URL}/process-video`);
+        // 处理返回的完整数据
+        historyItems.value = response.data.map(item => ({
+          id: item.videoId,
+          title: item.data.meta.videoTitle,
+          coverAddress: `https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg`,
+          duration: item.data.meta.videoDuration,
+          status: "ready"
+        }));
+        // 同时将完整数据存入 localStorage
+        response.data.forEach(item => {
+          localStorage.setItem(item.videoId, JSON.stringify(item.data));
+        });
+      } catch (error) {
+        console.error("获取历史列表失败:", error);
+        proxy.$message.error("获取历史列表失败");
       }
     };
+
+    // 在用户登录后获取历史列表
+    watch(() => auth.isLoggedIn.value, (newValue) => {
+      if (newValue) {
+        fetchUserProfile();
+        fetchHistoryList();
+      } else {
+        userProfile.value = {};
+        historyItems.value = []; // 清空历史列表
+      }
+    });
+
+    // 组件挂载时，如果用户已登录，获取历史列表
+    onMounted(() => {
+      if (isLoggedIn.value) {
+        fetchUserProfile();
+        fetchHistoryList();
+      }
+    });
 
     const closeVideoPlayer = () => {
       showVideoPlayer.value = false;
@@ -181,18 +222,6 @@ export default {
       }
     };
 
-    onMounted(() => {
-      fetchUserProfile();
-    });
-
-    watch(() => auth.isLoggedIn.value, (newValue) => {
-      if (newValue) {
-        fetchUserProfile();
-      } else {
-        userProfile.value = {};
-      }
-    });
-
     return {
       userInputUrl,
       currentVideoUrl,
@@ -200,7 +229,7 @@ export default {
       meta,
       currentVideoId,
       historyItems,
-      handleCardClick,
+      // handleCardClick,
       showVideoPlayer,
       closeVideoPlayer,
       handleLogout,
