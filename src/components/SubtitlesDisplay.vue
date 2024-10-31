@@ -6,8 +6,8 @@
       :class="{ subtitle: true, active: isSubtitleActive(subtitle) }"
       @click="$emit('seek-to-subtitle', subtitle)"
     >
-      <p>{{ subtitle.originText }}</p>
-      <p>{{ subtitle.translatedText }}</p>
+      <p class="origin-text">{{ subtitle.originText }}</p>
+      <p class="translated-text">{{ subtitle.translatedText }}</p>
     </div>
   </div>
 </template>
@@ -42,14 +42,30 @@ export default {
       () => {
         const activeSubtitle = props.subtitles.find(isSubtitleActive);
         if (activeSubtitle) {
-          const subtitleElement =
-            subtitlesContainer.value.children[
-              props.subtitles.indexOf(activeSubtitle)
-            ];
-          subtitleElement.scrollIntoView({
-            behavior: "smooth",
-            block: "nearest",
-          });
+          const container = subtitlesContainer.value;
+          const subtitleElement = container.children[props.subtitles.indexOf(activeSubtitle)];
+          
+          // 获取容器和元素的位置信息
+          const containerHeight = container.clientHeight;
+          const elementTop = subtitleElement.offsetTop;
+          const totalHeight = container.scrollHeight;
+          
+          // 判断是否有足够空间进行居中
+          // 90 是播放栏的高度
+          if (elementTop > (containerHeight - 90) / 2 && 
+              totalHeight - elementTop > (containerHeight - 90) / 2) {
+            // 有足够空间时居中显示
+            subtitleElement.scrollIntoView({
+              behavior: "auto",
+              block: "center"
+            });
+          } else {
+            // 靠近开头或结尾时，使用 nearest
+            subtitleElement.scrollIntoView({
+              behavior: "auto",
+              block: "nearest"
+            });
+          }
         }
       }
     );
@@ -62,27 +78,40 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .subtitles-container {
-  height: 200px;
   width: 100%;
   overflow-y: auto;
-  border: 1px solid #ccc;
-  margin-top: 10px;
+  margin-top: 8px;
   text-align: left;
-  padding: 10px;
+  padding: 8px 16px;
   box-sizing: border-box;
+  /* 自定义滚动动画 */
+  scroll-behavior: smooth; 
+  @media (prefers-reduced-motion: no-preference) {
+    scroll-behavior: smooth;
+    scroll-timeline: 0.01s;  // 缩短默认的滚动时间
+  }
 }
 
 .subtitle {
-  padding: 5px;
+  padding: 8px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-}
+  transition: background-color 0.18s ease;
 
-.subtitle.active {
-  background-color: #ffff00;
-  font-weight: bold;
+  & + .subtitle {
+    margin-top: 8px;
+  }
+
+  &.active {
+    background-color: $green;
+
+    .origin-text,
+    .translated-text {
+      color: white;
+    }
+  }
 }
 
 .subtitles-container::-webkit-scrollbar {
@@ -100,5 +129,18 @@ export default {
 
 .subtitles-container::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+.origin-text {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.translated-text {
+  padding-top: 8px;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.2;
 }
 </style>

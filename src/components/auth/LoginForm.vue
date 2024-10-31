@@ -4,7 +4,7 @@
     <input v-model="password" type="password" placeholder="密码" required class="auth-input" />
     <p v-if="error" class="error-message">{{ error }}</p>
     <button type="submit" class="auth-button" :disabled="isLoading">
-      {{ isLoading ? getSuccessMessage(SUCCESS_KEYS.REGISTERING) : '登录' }}
+      {{ isLoading ? getSuccessMessage(SUCCESS_KEYS.LOGGING) : '登录' }}
     </button>
   </form>
 </template>
@@ -14,7 +14,7 @@ import { ref, inject, getCurrentInstance } from "vue";
 import axios from 'axios';
 import { ERROR_KEYS, getErrorMessage, SUCCESS_KEYS, getSuccessMessage } from '@/constants/errorKeys';
 
-const API_BASE_URL = "http://192.168.128.179:3000";
+const API_BASE_URL = "http://192.168.128.153:3000";
 
 export default {
   name: "LoginForm",

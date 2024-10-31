@@ -143,6 +143,7 @@ export const getSuccessMessage = (successKey) => {
     [SUCCESS_KEYS.PROFILE_UPDATE_SUCCESS]: "个人信息更新成功",
     [SUCCESS_KEYS.OPERATION_SUCCESS]: "操作成功",
     [SUCCESS_KEYS.REGISTERING]: "注册中...",
+    [SUCCESS_KEYS.LOGGING]: "登录中...",
     [SUCCESS_KEYS.COMPLETE_REGISTRATION]: "完成注册",
     [SUCCESS_KEYS.LOGOUT_SUCCESS]: "登出成功",
   };

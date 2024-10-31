@@ -17,15 +17,20 @@
         <p class="list-item-duration">{{ formatDuration(item.duration) }}</p>
       </div>
       <div v-if="item.status !== 'ready'" class="status-indicator">
-        {{ getStatusText(item.status) }}
+        <Loading />
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import Loading from './Loading.vue';
+
 export default {
   name: "VideoList",
+  components: {
+    Loading
+  },
   props: {
     items: {
       type: Array,
@@ -38,16 +43,6 @@ export default {
         return;
       }
       this.$emit('itemClick', item);
-    },
-    getStatusText(status) {
-      switch (status) {
-        case 'loading':
-          return '处理中...';
-        case 'error':
-          return '处理失败';
-        default:
-          return '加载中...';
-      }
     },
     formatDuration(seconds) {
       if (!seconds) return '';
@@ -80,14 +75,15 @@ export default {
     margin-top: 8px;
   }
 
-  &:hover {
-    background-color: #f5f5f5;
-  }
+  // &:hover {
+  //   background-color: #f5f5f5;
+  // }
 }
 
 .list-item-cover {
-  width: 90px;
-  height: 60px;
+  width: 90px !important;  // 使用 !important 确保样式立即生效
+  height: 60px !important;
+  display: inline-block;
   object-fit: cover;
   border-radius: 8px;
   margin-right: 16px;
@@ -144,7 +140,7 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.2);
   color: white;
   padding: 5px 10px;
   border-radius: 4px;

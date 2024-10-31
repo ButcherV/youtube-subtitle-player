@@ -1,6 +1,12 @@
 <template>
   <div class="video-container">
     <div id="youtube-player" ref="youtubePlayerRef"></div>
+    <div 
+      v-if="showThumbnail" 
+      class="thumbnail-overlay"
+    >
+      <img :src="`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`" alt="thumbnail" />
+    </div>
   </div>
 </template>
 
@@ -20,8 +26,11 @@ export default {
   setup(props, { emit }) {
     const youtubePlayerRef = ref(null);
     const player = ref(null);
+    const showThumbnail = ref(true);
+    const videoId = ref('');
 
     const initPlayer = (videoId) => {
+      console.log('Current User Agent:', window.navigator.userAgent);
       if (window.YT && window.YT.Player && youtubePlayerRef.value) {
         player.value = new window.YT.Player(youtubePlayerRef.value, {
           height: "100%",
@@ -43,8 +52,33 @@ export default {
             loop: 0, // 禁止循环播放
           },
           events: {
-            onReady: onPlayerReady,
-            onStateChange: onPlayerStateChange,
+            onReady: (event) => {
+              console.log('播放器就绪事件触发');
+              onPlayerReady(event);
+            },
+            onStateChange: (event) => {
+              console.log('播放器状态改变:', event.data);
+              onPlayerStateChange(event);
+            },
+            onError: (event) => {
+              // 添加错误处理
+              console.error('YouTube播放器错误:', event.data);
+              switch(event.data) {
+                case 2:
+                  console.error('无效参数');
+                  break;
+                case 5:
+                  console.error('HTML5播放器错误');
+                  break;
+                case 100:
+                  console.error('视频不存在或已被删除');
+                  break;
+                case 101:
+                case 150:
+                  console.error('视频所有者禁止嵌入播放');
+                  break;
+              }
+            }
           },
         });
       }
@@ -52,9 +86,9 @@ export default {
 
     const onPlayerReady = (event) => {
       emit("player-ready", event.target);
-      emit("duration-change", event.target.getDuration());
+      // emit("duration-change", event.target.getDuration());
 
-      // 禁用自带字幕
+      // 禁用自带字幕 - 没用
       event.target.unloadModule("captions");
       event.target.unloadModule("cc");
 
@@ -62,7 +96,14 @@ export default {
         event.target.setOption("captions", "track", {});
       }
 
-      // 短暂播放然后暂停视频，遮盖播放键
+      // 播放后隐藏缩略图
+      event.target.addEventListener('onStateChange', (e) => {
+        if (e.data === 1) { // 1 表示开始播放
+          showThumbnail.value = false;
+        }
+      });
+
+     // 短暂播放然后暂停视频，遮盖播放键
       event.target.playVideo();
       setTimeout(() => {
         event.target.pauseVideo();
@@ -115,22 +156,22 @@ export default {
 
     onMounted(async () => {
       await loadYouTubeIframeAPI();
-      const videoId = extractVideoId(props.videoUrl);
-      if (videoId) {
-        initPlayer(videoId);
+      videoId.value = extractVideoId(props.videoUrl);
+      if (videoId.value) {
+        initPlayer(videoId.value);
       }
     });
 
     watch(
       () => props.videoUrl,
       async (newUrl) => {
-        const videoId = extractVideoId(newUrl);
-        if (videoId) {
+        videoId.value = extractVideoId(newUrl);
+        if (videoId.value) {
           if (player.value) {
-            player.value.loadVideoById(videoId);
+            player.value.loadVideoById(videoId.value);
           } else {
             await loadYouTubeIframeAPI();
-            initPlayer(videoId);
+            initPlayer(videoId.value);
           }
         }
       }
@@ -138,16 +179,23 @@ export default {
 
     return {
       youtubePlayerRef,
+      showThumbnail, 
+      videoId
     };
   },
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .video-container {
-  width: 100%;
+  width: 96%;
+  border-radius: 8px;
   position: relative;
-  padding-bottom: 56.25%; /* 16:9 宽高比 */
+  margin-top: 8px;
+
+  :deep(iframe) {
+    border-radius: 8px;
+  }
 }
 
 .video-container #youtube-player {
@@ -156,5 +204,21 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+.thumbnail-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.thumbnail-overlay img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
 }
 </style>

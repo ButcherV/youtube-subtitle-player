@@ -1,5 +1,5 @@
 <template>
-  <div class="loader" :title="title">
+  <div class="loader">
     <svg
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
@@ -39,10 +39,6 @@
 export default {
   name: "LoadingSpinner",
   props: {
-    title: {
-      type: String,
-      default: "0",
-    },
     color: {
       type: String,
       default: "#000",

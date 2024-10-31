@@ -40,7 +40,7 @@
 import { ref, getCurrentInstance, computed } from "vue";
 import axios from 'axios';
 import { ERROR_KEYS, getErrorMessage, SUCCESS_KEYS, getSuccessMessage } from '@/constants/errorKeys';
-const API_BASE_URL = "http://192.168.128.179:3000";
+const API_BASE_URL = "http://192.168.128.153:3000";
 
 export default {
   name: "RegisterForm",

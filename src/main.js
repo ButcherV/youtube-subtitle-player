@@ -8,7 +8,12 @@ import {
   faChevronUp,
   faChevronDown,
   faRightFromBracket,
-  faRightToBracket
+  faRightToBracket,
+  faPlay,
+  faPause,
+  faRepeat,
+  faStop,
+  faRotateRight
 } from "@fortawesome/free-solid-svg-icons";
 import router from "./router";
 import "./assets/styles/main.scss";
@@ -24,7 +29,12 @@ library.add(
   faChevronUp, 
   faChevronDown,
   faRightFromBracket,
-  faRightToBracket
+  faRightToBracket,
+  faPlay,
+  faPause,
+  faRepeat,
+  faStop,
+  faRotateRight
 );
 
 const app = createApp(App);
@@ -50,6 +60,14 @@ axios.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// 2. 在 main.js 中添加
+import VConsole from 'vconsole';
+
+// 3. 初始化
+if (process.env.NODE_ENV !== 'production') {
+  new VConsole();
+}
 
 app.use(router);
 app.component("font-awesome-icon", FontAwesomeIcon);

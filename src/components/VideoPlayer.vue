@@ -10,14 +10,15 @@
       :video-url="videoUrl"
       @player-ready="onPlayerReady"
       @player-state-change="onPlayerStateChange"
-      @duration-change="duration = $event"
     />
     <SubtitlesDisplay
+      class="subtitles-wrapper"
       :subtitles="parsedSubtitles"
       :current-time="currentTime"
       @seek-to-subtitle="seekToSubtitle"
     />
     <ControlBar
+      class="control-bar"
       :is-playing="isPlaying"
       :current-time="currentTime"
       :duration="duration"
@@ -77,7 +78,7 @@ export default {
     const player = ref(null);
     const isPlaying = ref(false);
     const currentTime = ref(0);
-    const duration = ref(0);
+    const duration = ref(props.meta.videoDuration);
     const isLooping = ref(false);
     const loopStart = ref(0);
     const loopEnd = ref(0);
@@ -89,10 +90,27 @@ export default {
     const parsedSubtitles = computed(() => props.subtitles);
 
     const onPlayerReady = (playerInstance) => {
+      console.log('Player ready:', playerInstance);
       player.value = playerInstance;
+      
+      // 测试播放器功能
+      try {
+        console.log('Testing player methods:');
+        console.log('- playVideo exists:', typeof playerInstance.playVideo === 'function');
+        console.log('- pauseVideo exists:', typeof playerInstance.pauseVideo === 'function');
+        console.log('- getCurrentTime exists:', typeof playerInstance.getCurrentTime === 'function');
+      } catch (error) {
+        console.error('Error testing player methods:', error);
+      }
     };
 
     const onPlayerStateChange = (event) => {
+      console.log('Player state changed:', {
+        data: event.data,
+        previousState: isPlaying.value,
+        playerExists: !!player.value
+      });
+      
       isPlaying.value = event.data === YT.PlayerState.PLAYING;
       if (isPlaying.value && isLooping.value) {
         checkAndResetLoop();
@@ -100,12 +118,17 @@ export default {
     };
 
     const togglePlay = () => {
+      console.log('togglePlay called, player:', player.value);
       if (player.value) {
         if (isPlaying.value) {
+          console.log('Attempting to pause video');
           player.value.pauseVideo();
         } else {
+          console.log('Attempting to play video');
           player.value.playVideo();
         }
+      } else {
+        console.warn('Player not initialized!');
       }
     };
 
@@ -246,4 +269,21 @@ export default {
   line-height: 1.2;
   max-height: 2.4em; // 2 行的高度
 }
+
+.control-bar {
+  position: fixed;
+  width: 86%;
+  bottom: 8px;
+  padding: 16px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+// 90 是播放控制栏的高度
+.subtitles-wrapper {
+  height: calc(100% - 170px - 64px);
+  padding-bottom: 90px;
+}
+
 </style>

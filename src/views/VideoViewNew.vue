@@ -58,7 +58,7 @@ import axios from "axios";
 import { SUCCESS_KEYS, ERROR_KEYS, getSuccessMessage, getErrorMessage } from '@/constants/errorKeys';
 import VideoList from '@/components/VideoList.vue';
 
-const API_BASE_URL = "http://192.168.128.179:3000";
+const API_BASE_URL = "http://192.168.128.153:3000";
 
 export default {
   name: "VideoView",
