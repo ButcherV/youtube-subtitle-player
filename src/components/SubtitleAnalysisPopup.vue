@@ -7,7 +7,7 @@
         @mouseup="handleTextSelection"
         @touchend="handleTextSelection"
         @contextmenu.prevent
-      >{{ subtitle.originText }}</p>
+      >{{ currentSubtitle }}</p>
       <Loading
         color="#666" 
         :duration="0.8"
@@ -40,7 +40,7 @@
   </div>
 </template>
 <script>
-import { ref } from "vue";
+import { ref, watch, computed } from "vue";
 import Loading from "./Loading.vue";
 export default {
   name: "SubtitleAnalysisPopup",
@@ -57,6 +57,17 @@ export default {
   },
   emits: ["close"],
   setup(props, { emit }) {
+    // 缓存当前正在分析的字幕
+    const currentAnalyzingSubtitle = ref(null);
+
+    // 当 isActive 变为 true 时，缓存当前字幕
+    // 为了解决当字幕分析弹窗打开时，但字幕内容发生变化（时间戳不精确），导致字幕瞬间跳转的问题
+    watch(() => props.isActive, (newValue) => {
+      if (newValue) {
+        currentAnalyzingSubtitle.value = props.subtitle.originText;
+      }
+    });
+
     // 添加 watch 来观察数据
     const showCustomMenu = ref(false);
     const menuPosition = ref({
@@ -98,7 +109,8 @@ export default {
       showCustomMenu,
       menuPosition,
       handleTextSelection,
-      handleAnalyze
+      handleAnalyze,
+      currentSubtitle: computed(() => currentAnalyzingSubtitle.value || props.subtitle)
     };
   }
 };

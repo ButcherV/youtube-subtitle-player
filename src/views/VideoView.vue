@@ -14,7 +14,7 @@
             v-else
             :icon="['fas', 'fa-right-to-bracket']" 
             @click="auth.showAuthModal" 
-            class="log-btn" 
+            class="log-btn"
           />
         </div>
         <p class="info-card-subtitle">本日视频引入时长：13 分</p>
