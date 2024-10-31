@@ -16,9 +16,6 @@
             @click="auth.showAuthModal" 
             class="log-btn" 
           />
-          <!-- <iframe width="560" height="315" src="https://www.youtube.com/embed/cGo5rXUAH2o?si=-mhQwGSRjncthVkR" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
-          <!-- <iframe width="560" height="315" src="https://www.youtube.com/embed/9AjkUyX0rVw?si=hLkxb1VKj_SWcdO-" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
-          <!-- <iframe width="560" height="315" src="https://www.youtube.com/embed/Jd10x8LiuBc?si=vZFtq_uHmwYpB2x5" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
         </div>
         <p class="info-card-subtitle">本日视频引入时长：13 分</p>
         <p class="info-card-subtitle">本月时长配额：2 小时 23 分 / 5 小时</p>

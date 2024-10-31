@@ -141,13 +141,12 @@ button {
   -moz-appearance: none;
 }
 
-// 可选：禁用状态的样式
 button:disabled {
   cursor: default;
   opacity: 0.6;
 }
 
-// 可选：移除 iOS 上的圆角和阴影
+// 移除 iOS 上的圆角和阴影
 input,
 button {
   -webkit-tap-highlight-color: transparent;

@@ -54,7 +54,7 @@ export default {
       return `${minutes}:${seconds.toString().padStart(2, "0")}`;
     };
 
-    // 添加这个 watch 来更新进度条颜色
+    //更新进度条颜色
     watch(
       () => props.currentTime,
       (newTime) => {

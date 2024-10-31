@@ -86,7 +86,6 @@ export default {
 
     const onPlayerReady = (event) => {
       emit("player-ready", event.target);
-      // emit("duration-change", event.target.getDuration());
 
       // 禁用自带字幕 - 没用
       event.target.unloadModule("captions");

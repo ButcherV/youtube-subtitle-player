@@ -61,13 +61,11 @@ axios.interceptors.response.use(
   }
 );
 
-// 2. 在 main.js 中添加
-import VConsole from 'vconsole';
-
-// 3. 初始化
-if (process.env.NODE_ENV !== 'production') {
-  new VConsole();
-}
+// 移动端调试
+// import VConsole from 'vconsole';
+// if (process.env.NODE_ENV !== 'production') {
+//   new VConsole();
+// }
 
 app.use(router);
 app.component("font-awesome-icon", FontAwesomeIcon);

@@ -92,25 +92,9 @@ export default {
     const onPlayerReady = (playerInstance) => {
       console.log('Player ready:', playerInstance);
       player.value = playerInstance;
-      
-      // 测试播放器功能
-      try {
-        console.log('Testing player methods:');
-        console.log('- playVideo exists:', typeof playerInstance.playVideo === 'function');
-        console.log('- pauseVideo exists:', typeof playerInstance.pauseVideo === 'function');
-        console.log('- getCurrentTime exists:', typeof playerInstance.getCurrentTime === 'function');
-      } catch (error) {
-        console.error('Error testing player methods:', error);
-      }
     };
 
     const onPlayerStateChange = (event) => {
-      console.log('Player state changed:', {
-        data: event.data,
-        previousState: isPlaying.value,
-        playerExists: !!player.value
-      });
-      
       isPlaying.value = event.data === YT.PlayerState.PLAYING;
       if (isPlaying.value && isLooping.value) {
         checkAndResetLoop();
@@ -118,7 +102,6 @@ export default {
     };
 
     const togglePlay = () => {
-      console.log('togglePlay called, player:', player.value);
       if (player.value) {
         if (isPlaying.value) {
           console.log('Attempting to pause video');
