@@ -16,7 +16,6 @@
             <div class="button-group">
               <button class="icon-button">
                 <font-awesome-icon icon="plus" />
-                
               </button>
               <button 
                 class="icon-button" 
@@ -55,7 +54,7 @@
 </template>
 
 <script>
-import { ref, watch, computed, nextTick } from "vue";
+import { ref, watch, computed, nextTick, onMounted, onUnmounted } from "vue";
 import { cleanText } from "../utils/helper"; 
 import axios from 'axios';
 import Loading from './Loading.vue'; 
@@ -80,6 +79,11 @@ export default {
     const textRef = ref(null);
     const grammarAnalysis = ref(null);
     const isAnalyzing = ref(false);
+    const hasSelectedText = ref(false);
+
+    // 保存选中的文本。不能在调用方法时再保存。
+    // 否则因为调用方法本身就会失焦，会出现选中的文本为空的情况
+    const currentSelectedText = ref('');
 
     watch(() => props.isActive, (newValue) => {
       if (newValue) {
@@ -92,6 +96,11 @@ export default {
             const selection = window.getSelection();
             selection.removeAllRanges();
             selection.addRange(range);
+            // 初始化时，保存选中的文本
+            const selectedText = selection.toString().trim();
+            hasSelectedText.value = selectedText.length > 0;
+            currentSelectedText.value = selectedText;
+            
             textRef.value.blur();
 
             // 自动触发语法分析
@@ -102,6 +111,22 @@ export default {
           }
         });
       }
+    });
+
+    onMounted(() => {
+      document.addEventListener('selectionchange', () => {
+        const selection = window.getSelection();
+        const text = selection.toString().trim();
+        hasSelectedText.value = text.length > 0;
+        currentSelectedText.value = text;
+      });
+    });
+
+    onUnmounted(() => {
+      document.removeEventListener('selectionchange', () => {
+        const selection = window.getSelection();
+        hasSelectedText.value = selection.toString().trim().length > 0;
+      });
     });
 
     const handleBlur = () => {
@@ -117,12 +142,12 @@ export default {
     };
 
     const handleAnalyzeGrammar = async () => {
-      const selection = window.getSelection();
-      const selectedText = cleanText(selection.toString());
-      console.log("selectedText", selectedText);
-      const textToAnalyze = selectedText || currentAnalyzingSubtitle.value;
+      const textToAnalyze = cleanText(currentSelectedText.value);  // 使用保存的文本
 
-      if (!textToAnalyze) return;
+      if (!textToAnalyze) {
+        console.warn('没有要分析的文本');
+        return;
+      }
 
       isAnalyzing.value = true;
       grammarAnalysis.value = null;
@@ -136,19 +161,10 @@ export default {
         grammarAnalysis.value = response.data;
       } catch (error) {
         console.error('语法分析失败:', error);
-        // 可以添加错误提示
       } finally {
         isAnalyzing.value = false;
       }
     };
-
-    const hasSelectedText = computed(() => {
-      const selection = window.getSelection();
-      const selectedText = selection.toString().trim();
-      console.log('当前选中的文本:', selectedText);  // 添加日志
-      console.log('选中的节点:', selection.anchorNode);  // 添加日志
-      return selectedText.length > 0;
-    });
     
     return { 
       close,
