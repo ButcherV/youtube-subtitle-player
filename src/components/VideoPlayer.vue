@@ -220,7 +220,7 @@ export default {
   bottom: 0;
   right: 0;
   z-index: $zIndexVideoPlayer;
-  background-color: white;
+  background-color: #f2f2f2;
 }
 
 .video-title-wrapper {
@@ -228,7 +228,7 @@ export default {
   align-items: center;
   height: 48px; // 定高
   padding: 8px 16px ;
-  background-color: #f5f5f5;
+  background-color: $purple;
 }
 
 .back-button {
@@ -238,11 +238,13 @@ export default {
   cursor: pointer;
   padding: 8px;
   margin-right: 16px;
+  color: white;
 }
 
 .video-title {
   flex: 1;
   font-size: 16px;
+  color: white;
   font-weight: bold;
   margin: 0;
   overflow: hidden;
@@ -267,6 +269,7 @@ export default {
 .subtitles-wrapper {
   height: calc(100% - 170px - 64px);
   padding-bottom: 90px;
+  margin-bottom: 8px;
 }
 
 </style>

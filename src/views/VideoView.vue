@@ -277,6 +277,17 @@ export default {
     0 4px 6px rgba(0, 0, 0, 0.1),
     0 1px 3px rgba(0, 0, 0, 0.08),
     0 8px 15px rgba(0, 0, 0, 0.05);
+  position: relative;
+
+  &::before {
+    content: "";
+    width: 30px;
+    height: 30px;
+    background-color: $green;
+    position: absolute;
+    bottom: -15px;
+    right: 0;
+  }
 }
 
 .info-card-input-group {
@@ -340,6 +351,8 @@ export default {
 }
 
 .card-info {
+  border-top-right-radius: 16px;
+  background-color: $purple;
   padding: 16px;
   display: flex;
   justify-content: space-between;

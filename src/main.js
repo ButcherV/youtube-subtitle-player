@@ -13,8 +13,11 @@ import {
   faPause,
   faRepeat,
   faStop,
-  faRotateRight
+  faRotateRight,
+  faXmark,
+  faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
+import { faStar as faStarRegular } from "@fortawesome/free-regular-svg-icons";
 import router from "./router";
 import "./assets/styles/main.scss";
 import { auth } from './composables/useAuth'
@@ -34,7 +37,10 @@ library.add(
   faPause,
   faRepeat,
   faStop,
-  faRotateRight
+  faRotateRight,
+  faXmark,
+  faMagnifyingGlass,
+  faStarRegular
 );
 
 const app = createApp(App);
@@ -62,10 +68,10 @@ axios.interceptors.response.use(
 );
 
 // 移动端调试
-// import VConsole from 'vconsole';
-// if (process.env.NODE_ENV !== 'production') {
-//   new VConsole();
-// }
+import VConsole from 'vconsole';
+if (process.env.NODE_ENV !== 'production') {
+  new VConsole();
+}
 
 app.use(router);
 app.component("font-awesome-icon", FontAwesomeIcon);
