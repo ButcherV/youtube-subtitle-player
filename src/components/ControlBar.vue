@@ -110,7 +110,7 @@ export default {
       width: 16px;
       height: 16px;
       border-radius: 50%;
-      background: $green;
+      background: $purple;
       cursor: pointer;
       transition: all 0.2s ease;
       margin-top: -6px;
@@ -122,7 +122,7 @@ export default {
       height: 12px;
       border: none;
       border-radius: 50%;
-      background: $green;
+      background: $purple;
       cursor: pointer;
       transition: all 0.2s ease;
       margin-top: -4px;
@@ -134,8 +134,8 @@ export default {
       height: 4px;
       background: linear-gradient(
         to right,
-        $green 0%,
-        $green calc((var(--value) / var(--max) * 100%)),
+        $purple 0%,
+        $purple calc((var(--value) / var(--max) * 100%)),
         #e0e0e0 calc((var(--value) / var(--max) * 100%)),
         #e0e0e0 100%
       );
@@ -159,7 +159,7 @@ export default {
   button {
     font-size: 24px;
     width: 32px;
-    color: $green;
+    color: $purple;
   }
 
   button + button {

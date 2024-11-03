@@ -4,7 +4,7 @@
       v-for="item in items"
       :key="item.id"
       class="list-item"
-      :class="{ 'loading': item.status !== 'ready' }"
+      :class="{ 'is-loading': item.status !== 'ready' }"
       @click="handleItemClick(item)"
     >
       <div class="list-item-cover-wrapper">
@@ -15,8 +15,8 @@
         />
       </div>
       <div class="list-item-info">
-        <h3 class="list-item-title">{{ item.title }}</h3>
-        <p class="list-item-duration">{{ formatDuration(item.duration) }}</p>
+        <h3 class="list-item-title">{{ item.title || '' }}</h3>
+        <p class="list-item-duration">{{ item.duration ? formatDuration(item.duration) : '' }}</p>
       </div>
       <div v-if="item.status !== 'ready'" class="status-indicator">
         <Loading />
@@ -75,6 +75,12 @@ export default {
 
   & + .list-item {
     margin-top: 8px;
+    }
+
+  &.is-loading {
+    opacity: 0.5;
+    pointer-events: none;
+    position: relative;
   }
 }
 
@@ -132,12 +138,6 @@ export default {
     font-size: 14px;
     font-weight: bold;
   }
-}
-
-.loading {
-  opacity: 0.7;
-  pointer-events: none;
-  position: relative;
 }
 
 .status-indicator {

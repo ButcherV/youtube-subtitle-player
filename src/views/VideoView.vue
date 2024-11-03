@@ -108,11 +108,14 @@ export default {
       // 先添加一个加载状态的项
       historyItems.value.unshift({
         id: videoId,
-        title: "加载中...",
+        title: "",
         coverAddress: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-        duration: "加载中",
+        duration: 0,
         status: "loading"
       });
+
+      // 清空输入框
+      userInputUrl.value = "";
 
       try {
         const response = await axios.post(`${API_BASE_URL}/process-video`, { videoUrl: url });
@@ -133,9 +136,6 @@ export default {
 
           // 存储完整数据到 localStorage
           localStorage.setItem(videoId, JSON.stringify({ meta, subtitles }));
-
-          // 清空输入框
-          userInputUrl.value = "";
         }
       } catch (error) {
         console.error("处理视频失败:", error);
@@ -271,12 +271,12 @@ export default {
 .info-card {
   padding: 16px;
   background-color: $green;
-  border-bottom-left-radius: 16px;
-  border-bottom-right-radius: 16px;
-  box-shadow: 
-    0 4px 6px rgba(0, 0, 0, 0.1),
-    0 1px 3px rgba(0, 0, 0, 0.08),
-    0 8px 15px rgba(0, 0, 0, 0.05);
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  // box-shadow: 
+  //   0 4px 6px rgba(0, 0, 0, 0.1),
+  //   0 1px 3px rgba(0, 0, 0, 0.08),
+  //   0 8px 15px rgba(0, 0, 0, 0.05);
   position: relative;
 
   &::before {
@@ -351,9 +351,9 @@ export default {
 }
 
 .card-info {
-  border-top-right-radius: 16px;
+  border-top-right-radius: 18px;
   background-color: $purple;
-  padding: 16px;
+  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;

@@ -26,17 +26,18 @@
                 <font-awesome-icon :icon="['fas', 'magnifying-glass']" />
                 <p class="icon-text">语法分析</p>
               </button>
-              <button 
+              <button
                 class="icon-button"
-                :disabled="!grammarAnalysis"
-                :class="{ 'is-disabled': !grammarAnalysis }"
+                :disabled="!canSave"
+                :class="{ 'is-disabled': !canSave }"
+                @click="handleSaveWordCard"
               >
                 <font-awesome-icon icon="plus" />
                 <p class="icon-text">收藏</p>
               </button>
-              <button class="icon-button">
+              <!-- <button class="icon-button">
                 <font-awesome-icon icon="plus" />
-              </button>
+              </button> -->
             </div>
           </div>
           <div class="main-grammer-wrapper">
@@ -57,7 +58,7 @@
 </template>
 
 <script>
-import { ref, watch, computed, nextTick, onMounted, onUnmounted } from "vue";
+import { ref, watch, computed, nextTick, onMounted, onUnmounted, getCurrentInstance } from "vue";
 import { cleanText } from "../utils/helper"; 
 import axios from 'axios';
 import Loading from './Loading.vue';
@@ -95,10 +96,15 @@ export default {
     const grammarAnalysis = ref(null);
     const isAnalyzing = ref(false);
     const hasSelectedText = ref(false);
+    const { proxy } = getCurrentInstance();
 
-    // 保存选中的文本。不能在调用方法时再保存。
-    // 否则因为调用方法本身就会失焦，会出现选中的文本为空的情况
+    // 用于实时跟踪用户选中的文本，控制"语法分析"按钮的状态
+    // 会随着用户选择/失焦而改变
     const currentSelectedText = ref('');
+    
+    // 用于保存已经点击"语法分析"的文本，控制"收藏"按钮的状态和收藏的内容
+    // 不会因为失焦而改变，只在点击"语法分析"时更新
+    const analyzingText = ref('');
 
     watch(() => props.isActive, (newValue) => {
       if (newValue) {
@@ -166,14 +172,17 @@ export default {
       emit("close");
     };
 
+    // 语法分析时，保存当前选中的文本，避免失焦后找不到要分析的内容
     const handleAnalyzeGrammar = async () => {
-      const textToAnalyze = cleanText(currentSelectedText.value);  // 使用保存的文本
-
+      // 在分析前保存当前选中的文本
+      const textToAnalyze = cleanText(currentSelectedText.value);
       if (!textToAnalyze) {
         console.warn('没有要分析的文本');
         return;
       }
 
+      // 保存正在分析的文本
+      analyzingText.value = textToAnalyze;
       isAnalyzing.value = true;
       grammarAnalysis.value = null;
 
@@ -194,6 +203,47 @@ export default {
         console.error('语法分析失败:', error);
       } finally {
         isAnalyzing.value = false;
+      }
+    };
+
+    // 使用 analyzingText 判断是否可以收藏
+    // 因为 currentSelectedText 会因为失焦变为空，而 analyzingText 不会
+    const canSave = computed(() => {
+      return grammarAnalysis.value 
+        && analyzingText.value 
+        && !isAnalyzing.value;
+    });
+
+    const handleSaveWordCard = async () => {
+      if (!grammarAnalysis.value) {
+        console.warn('没有可收藏的内容');
+        return;
+      }
+
+      try {
+        const payload = {
+          text: analyzingText.value,
+          type: grammarAnalysis.value.type,
+          data: grammarAnalysis.value,
+          videoInfo: {
+            videoId: props.subtitle.videoId,
+            videoTitle: props.subtitle.title,
+            text: props.subtitle.originText,
+            startTime: props.subtitle.start,
+            endTime: props.subtitle.end
+          }
+        };
+
+        const response = await axios.post(`${API_BASE_URL}/wordcard/save`, payload);
+        
+        // 根据后端返回的消息显示提示
+        if (response.data.success) {
+          proxy.$message.success(response.data.message || '收藏成功');
+        } else {
+          proxy.$message.warning(response.data.message || '该内容已收藏过');
+        }
+      } catch (error) {
+        console.error('收藏失败:', error);
       }
     };
 
@@ -219,7 +269,9 @@ export default {
       grammarAnalysis,
       isAnalyzing,
       hasSelectedText,
-      analysisComponent
+      analysisComponent,
+      handleSaveWordCard,
+      canSave
     };
   }
 };
@@ -282,8 +334,8 @@ export default {
 
 .close-button {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 8px;
+  right: 8px;
   border: none;
   font-size: 24px;
   width: 32px;
@@ -297,24 +349,24 @@ export default {
 
 .main-text-wrapper {
   padding: 40px 16px 16px 16px;
-  border-radius: 16px 16px 0px 16px;
+  border-radius: 16px 16px 0px 32px;
   background-color: $green;
   position: relative;
 
   &::before {
     content: "";
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     background-color: $green;
     position: absolute;
-    bottom: -15px;
+    bottom: -25px;
     right: 0;
   }
 }
 
 .main-grammer-wrapper {
   background-color: white;
-  border-top-right-radius: 16px;
+  border-top-right-radius: 32px;
   z-index: 1;
   flex: 1;
   overflow-y: auto;
@@ -323,9 +375,9 @@ export default {
 }
 
 .main-text {
-  width: 80%;
+  width: 90%;
   margin: 0 auto;
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1.2;
   color: white;
   font-weight: 900;
@@ -343,6 +395,8 @@ export default {
   display: flex;
   justify-content: space-around;
   margin-top: 24px;
+  width: 80%;
+  margin: 24px auto 0 auto;
 }
 
 .icon-button {

@@ -152,3 +152,7 @@ button {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
 }
+
+input:focus {
+  outline: none;
+}

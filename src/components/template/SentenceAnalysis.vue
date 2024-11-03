@@ -2,8 +2,10 @@
   <div class="sentence-analysis">
     <div class="para-wrapper">
       <h3 class="para-title">翻译</h3>
-      <p class="origin-content">{{ data.text }}</p>
-      <p class="para-content">{{ data.translation }}</p>
+      <div class="para-content">
+        <p class="origin-content">{{ data.text }}</p>
+        <p>{{ data.translation }}</p>
+      </div>
     </div>
     <div class="grammar para-wrapper">
       <h3 class="para-title">语法结构</h3>
