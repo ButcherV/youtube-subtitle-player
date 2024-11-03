@@ -68,10 +68,10 @@ axios.interceptors.response.use(
 );
 
 // 移动端调试
-import VConsole from 'vconsole';
-if (process.env.NODE_ENV !== 'production') {
-  new VConsole();
-}
+// import VConsole from 'vconsole';
+// if (process.env.NODE_ENV !== 'production') {
+//   new VConsole();
+// }
 
 app.use(router);
 app.component("font-awesome-icon", FontAwesomeIcon);

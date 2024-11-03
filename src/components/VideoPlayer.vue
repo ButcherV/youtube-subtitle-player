@@ -167,9 +167,20 @@ export default {
     };
 
     const currentSubtitle = computed(() => {
-      return parsedSubtitles.value.find(
+      const current = parsedSubtitles.value.find(
         subtitle => currentTime.value >= subtitle.start && currentTime.value < subtitle.end
       );
+      
+      if (!current) return null;
+      
+      const index = parsedSubtitles.value.indexOf(current);
+      return {
+        ...current,
+        title: props.meta.videoTitle,
+        // description: props.meta.videoDescription,
+        previous: index > 0 ? parsedSubtitles.value[index - 1].originText : '',
+        next: index < parsedSubtitles.value.length - 1 ? parsedSubtitles.value[index + 1].originText : ''
+      };
     });
 
     watch(isPlaying, (newValue) => {

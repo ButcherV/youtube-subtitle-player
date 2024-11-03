@@ -187,6 +187,7 @@ export default {
 
 <style scoped lang="scss">
 .video-container {
+  min-height: 130px;
   width: 96%;
   border-radius: 8px;
   position: relative;

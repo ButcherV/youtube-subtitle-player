@@ -44,7 +44,7 @@
               {{ grammarAnalysis }}
             </div>
             <div v-else-if="isAnalyzing" class="analyzing">
-              <Loading color="#666" :duration="0.8" />
+              <Loading color="#5B37B7" :duration="0.8" />
             </div>
           </div>
         </div>
@@ -70,7 +70,13 @@ export default {
     subtitle: {
       type: Object,
       required: false,
-      default: () => ({})
+      default: () => ({
+        originText: '',
+        title: '',
+        description: '',
+        previous: '',
+        next: ''
+      })
     }
   },
   emits: ["close"],
@@ -103,11 +109,21 @@ export default {
             
             textRef.value.blur();
 
+            // 弹窗打开时，禁止背景滚动
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+
             // 自动触发语法分析
             handleAnalyzeGrammar();
           } else {
             grammarAnalysis.value = null;
             isAnalyzing.value = false;
+
+            // 弹窗关闭时，恢复背景滚动
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
           }
         });
       }
@@ -155,7 +171,13 @@ export default {
       try {
         const response = await axios.post(`${API_BASE_URL}/grammar/analyze`, {
           text: textToAnalyze,
-          context: props.subtitle?.context || ''
+          context: {
+            originText: props.subtitle.originText,
+            title: props.subtitle.title,
+            // description: props.subtitle.description,
+            previous: props.subtitle.previous,
+            next: props.subtitle.next
+          }
         });
         
         grammarAnalysis.value = response.data;
@@ -272,6 +294,7 @@ export default {
   border-top-right-radius: 16px;
   z-index: 1;
   flex: 1;
+  overflow-y: auto;
 }
 
 .main-text {

@@ -7,11 +7,13 @@
       :class="{ 'loading': item.status !== 'ready' }"
       @click="handleItemClick(item)"
     >
-      <img 
-        class="list-item-cover" 
-        :src="item.coverAddress" 
-        alt="Cover" 
-      />
+      <div class="list-item-cover-wrapper">
+        <img 
+          class="list-item-cover" 
+          :src="item.coverAddress" 
+          alt="Cover" 
+        />
+      </div>
       <div class="list-item-info">
         <h3 class="list-item-title">{{ item.title }}</h3>
         <p class="list-item-duration">{{ formatDuration(item.duration) }}</p>
@@ -74,17 +76,20 @@ export default {
   & + .list-item {
     margin-top: 8px;
   }
-
-  // &:hover {
-  //   background-color: #f5f5f5;
-  // }
 }
 
 .list-item-cover {
-  width: 90px !important;  // 使用 !important 确保样式立即生效
-  height: 60px !important;
-  display: inline-block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  border-radius: 8px;
+  margin-right: 16px;
+}
+
+.list-item-cover-wrapper {
+  width: 90px;
+  height: 60px;
+  flex-shrink: 0;
   border-radius: 8px;
   margin-right: 16px;
 }

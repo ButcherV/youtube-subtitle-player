@@ -37,6 +37,41 @@ export default {
       );
     };
 
+    // 把当前字幕滚动到垂直中间的位置 - 移动端效果不好，运动速度太慢。
+    // watch(
+    //   () => props.currentTime,
+    //   () => {
+    //     const activeSubtitle = props.subtitles.find(isSubtitleActive);
+    //     if (activeSubtitle) {
+    //       const container = subtitlesContainer.value;
+    //       const subtitleElement = container.children[props.subtitles.indexOf(activeSubtitle)];
+          
+    //       // 获取容器和元素的位置信息
+    //       const containerHeight = container.clientHeight;
+    //       const elementTop = subtitleElement.offsetTop;
+    //       const totalHeight = container.scrollHeight;
+          
+    //       // 判断是否有足够空间进行居中
+    //       // 90 是播放栏的高度
+    //       if (elementTop > (containerHeight - 90) / 2 && 
+    //           totalHeight - elementTop > (containerHeight - 90) / 2) {
+    //         // 有足够空间时居中显示
+    //         subtitleElement.scrollIntoView({
+    //           behavior: "auto",
+    //           block: "center"
+    //         });
+    //       } else {
+    //         // 靠近开头或结尾时，使用 nearest
+    //         subtitleElement.scrollIntoView({
+    //           behavior: "auto",
+    //           block: "nearest"
+    //         });
+    //       }
+    //     }
+    //   }
+    // );
+
+    // 直接滚动到顶部，不需要其他判断 - 移动端效果好，运动速度虽然没变化，但是不会阻挡用户看下一句。
     watch(
       () => props.currentTime,
       () => {
@@ -45,27 +80,11 @@ export default {
           const container = subtitlesContainer.value;
           const subtitleElement = container.children[props.subtitles.indexOf(activeSubtitle)];
           
-          // 获取容器和元素的位置信息
-          const containerHeight = container.clientHeight;
-          const elementTop = subtitleElement.offsetTop;
-          const totalHeight = container.scrollHeight;
-          
-          // 判断是否有足够空间进行居中
-          // 90 是播放栏的高度
-          if (elementTop > (containerHeight - 90) / 2 && 
-              totalHeight - elementTop > (containerHeight - 90) / 2) {
-            // 有足够空间时居中显示
-            subtitleElement.scrollIntoView({
-              behavior: "auto",
-              block: "center"
-            });
-          } else {
-            // 靠近开头或结尾时，使用 nearest
-            subtitleElement.scrollIntoView({
-              behavior: "auto",
-              block: "nearest"
-            });
-          }
+          // 直接滚动到顶部，不需要其他判断
+          subtitleElement.scrollIntoView({
+            behavior: "auto",
+            block: "start"
+          });
         }
       }
     );
