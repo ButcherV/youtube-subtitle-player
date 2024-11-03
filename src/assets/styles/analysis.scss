@@ -1,0 +1,32 @@
+.para-title {
+  font-size: 14px;
+  color: #888e9e;
+  font-style: italic;
+  line-height: 1.2;
+}
+
+.para-content {
+  padding: 0px 16px 0px 8px;
+  font-size: 16px;
+  line-height: 1.4;
+  border-left: 2px solid #c6c6c6;
+  margin-left: 4px;
+  margin-top: 4px;
+}
+
+.para-wrapper {
+  padding-bottom: 8px;
+  border-bottom: 1px solid #dbdbdb;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.para-wrapper + .para-wrapper {
+  margin-top: 16px;
+}
+
+.para-item + .para-item {
+  margin-top: 8px;
+}

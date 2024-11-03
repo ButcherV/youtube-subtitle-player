@@ -41,7 +41,10 @@
           </div>
           <div class="main-grammer-wrapper">
             <div v-if="grammarAnalysis" class="grammar-result">
-              {{ grammarAnalysis }}
+              <component 
+                :is="analysisComponent" 
+                :data="grammarAnalysis"
+              />
             </div>
             <div v-else-if="isAnalyzing" class="analyzing">
               <Loading color="#5B37B7" :duration="0.8" />
@@ -57,13 +60,19 @@
 import { ref, watch, computed, nextTick, onMounted, onUnmounted } from "vue";
 import { cleanText } from "../utils/helper"; 
 import axios from 'axios';
-import Loading from './Loading.vue'; 
+import Loading from './Loading.vue';
+import SentenceAnalysis from './template/SentenceAnalysis.vue'
+import PhraseAnalysis from './template/PhraseAnalysis.vue'
+import WordAnalysis from './template/WordAnalysis.vue' 
 const API_BASE_URL = "http://192.168.128.153:3000";
 
 export default {
   name: "SubtitleAnalysisPopup",
   components: {
-    Loading
+    Loading,
+    SentenceAnalysis,
+    PhraseAnalysis,
+    WordAnalysis
   },
   props: {
     isActive: Boolean,
@@ -187,6 +196,19 @@ export default {
         isAnalyzing.value = false;
       }
     };
+
+    const analysisComponent = computed(() => {
+      if (!grammarAnalysis.value) return null;
+      
+      console.log("grammarAnalysis.value.type", grammarAnalysis.value.type)
+
+      switch (grammarAnalysis.value.type) {
+        case 'SENTENCE': return SentenceAnalysis;
+        case 'PHRASE': return PhraseAnalysis;
+        case 'WORD': return WordAnalysis;
+        default: return null;
+      }
+    });
     
     return { 
       close,
@@ -196,7 +218,8 @@ export default {
       handleAnalyzeGrammar,
       grammarAnalysis,
       isAnalyzing,
-      hasSelectedText
+      hasSelectedText,
+      analysisComponent
     };
   }
 };
@@ -242,10 +265,10 @@ export default {
   border-radius: 16px 16px 0 0;
   transition: bottom 0.3s ease-in-out;
   z-index: $zIndexSubtitleAnalysisPopup + 1;
-  background-color: white;
+  background-color: $gray;
 
   &.active {
-    bottom: 0;
+    bottom: 0
   }
 }
 
@@ -295,6 +318,8 @@ export default {
   z-index: 1;
   flex: 1;
   overflow-y: auto;
+  padding: 16px 32px;
+  background-color: $gray;
 }
 
 .main-text {

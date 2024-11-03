@@ -231,7 +231,7 @@ export default {
   bottom: 0;
   right: 0;
   z-index: $zIndexVideoPlayer;
-  background-color: #f2f2f2;
+  background-color: $gray;
 }
 
 .video-title-wrapper {
