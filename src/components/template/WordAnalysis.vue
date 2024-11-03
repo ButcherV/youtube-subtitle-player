@@ -3,7 +3,7 @@
     <div class="basic-info para-wrapper">
       <h3 class="para-title">翻译</h3>
       <div class="para-content">
-        <h2>{{ data.original }}</h2>
+        <h2 class="origin-content">{{ data.original }}</h2>
         <p> |{{ data.phonetic }}|</p>
         <p>{{ data.translation }} / {{ data.roleInSentence }}</p>
       </div>

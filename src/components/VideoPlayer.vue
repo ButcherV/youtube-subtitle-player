@@ -238,7 +238,8 @@ export default {
   display: flex;
   align-items: center;
   height: 48px; // 定高
-  padding: 8px 16px ;
+  width: calc(100% - 32px);
+  padding: 8px 16px;
   background-color: $purple;
 }
 
