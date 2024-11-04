@@ -5,7 +5,7 @@
         <div class="card-content">
           <div class="card-text">
             <h3 class="card-text-title">WORDS</h3>
-            <p class="card-text-number">{{ stats.words || 0 }} Words</p>
+            <p class="card-text-number">{{ stats.words || 0 }} {{ stats.words === 1 ? 'Word' : 'Words' }}</p>
           </div>
           <div class="card-logo"></div>
         </div>
@@ -15,7 +15,7 @@
         <div class="card-content">
           <div class="card-text">
             <h3 class="card-text-title">PHRASES</h3>
-            <p class="card-text-number">{{ stats.phrases || 0 }} Phrases</p>
+            <p class="card-text-number">{{ stats.phrases || 0 }} {{ stats.phrases === 1 ? 'Phrase' : 'Phrases' }}</p>
           </div>
           <div class="card-logo"></div>
         </div>
@@ -25,7 +25,7 @@
         <div class="card-content">
           <div class="card-text">
             <h3 class="card-text-title">SENTENCES</h3>
-            <p class="card-text-number">{{ stats.sentences || 0 }} Sentences</p>
+            <p class="card-text-number">{{ stats.sentences || 0 }} {{ stats.sentences === 1 ? 'Sentence' : 'Sentences' }}</p>
           </div>
           <div class="card-logo"></div>
         </div>
@@ -34,8 +34,8 @@
       <div class="card is-error" @click="openList('ERROR')">
         <div class="card-content">
           <div class="card-text">
-            <h3 class="card-text-title">ERRORBOOK</h3>
-            <p class="card-text-number">{{ stats.errorBook || 0 }} Errors</p>
+            <h3 class="card-text-title">REVIEW LIST</h3>
+            <p class="card-text-number">{{ stats.errorBook || 0 }} {{ stats.errorBook === 1 ? 'Item' : 'Items' }}</p>
           </div>
           <div class="card-logo"></div>
         </div>
@@ -178,7 +178,7 @@ export default {
 }
 
 .card-text-number {
-  font-size: 14px;
+  font-size: 16px;
   color: #666;
   font-weight: 500;
   letter-spacing: 0.05em;
