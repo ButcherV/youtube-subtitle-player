@@ -238,8 +238,8 @@ export default {
 .video-title-wrapper {
   display: flex;
   align-items: center;
-  height: 48px; // 定高
-  width: calc(100% - 32px);
+  min-height: 48px; // 定高
+  width: 100%;
   padding: 8px 16px;
   background-color: $purple;
 }
@@ -270,7 +270,7 @@ export default {
 
 .control-bar {
   position: fixed;
-  width: 86%;
+  width: 90%;
   bottom: 8px;
   padding: 16px;
   background-color: white;

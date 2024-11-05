@@ -16,6 +16,9 @@ import {
   faRotateRight,
   faXmark,
   faMagnifyingGlass,
+  faEye,
+  faChevronLeft,
+  faChevronRight
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as faStarRegular } from "@fortawesome/free-regular-svg-icons";
 import router from "./router";
@@ -40,7 +43,10 @@ library.add(
   faRotateRight,
   faXmark,
   faMagnifyingGlass,
-  faStarRegular
+  faStarRegular,
+  faEye,
+  faChevronLeft,
+  faChevronRight
 );
 
 const app = createApp(App);

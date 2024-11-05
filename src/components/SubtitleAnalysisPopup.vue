@@ -201,6 +201,18 @@ export default {
         grammarAnalysis.value = response.data;
       } catch (error) {
         console.error('语法分析失败:', error);
+        // 根据错误类型显示不同提示
+        if (error.response) {
+          // 服务器返回错误
+          const message = error.response.data.message || '分析失败，请重试';
+          proxy.$message.error(message);
+        } else if (error.request) {
+          // 网络错误
+          proxy.$message.error('网络连接失败，请检查网络设置');
+        } else {
+          // 其他错误
+          proxy.$message.error('分析失败，请稍后重试');
+        }
       } finally {
         isAnalyzing.value = false;
       }
@@ -244,6 +256,18 @@ export default {
         }
       } catch (error) {
         console.error('收藏失败:', error);
+    
+        if (error.response) {
+          // 服务器返回错误
+          const message = error.response.data.message || '收藏失败，请重试';
+          proxy.$message.error(message);
+        } else if (error.request) {
+          // 网络错误
+          proxy.$message.error('网络连接失败，请检查网络设置');
+        } else {
+          // 其他错误
+          proxy.$message.error('收藏失败，请稍后重试');
+        }
       }
     };
 

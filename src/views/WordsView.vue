@@ -42,12 +42,15 @@
       </div>
     </div>
   </div>
-
-  <WordList 
-    v-model:visible="listVisible"
-    :type="currentType"
-    @closed="fetchStats"
-  />
+  <Teleport to="body">
+    <Transition name="slide-left">
+      <WordList
+        v-if="listVisible"
+        :type="currentType"
+        @closed="handleClosed"
+      />
+    </Transition>
+  </Teleport>  
 </template>
 
 <script>
@@ -73,6 +76,18 @@ export default {
     });
 
     const openList = (type) => {
+      const count = {
+        'WORD': stats.value.words,
+        'PHRASE': stats.value.phrases,
+        'SENTENCE': stats.value.sentences,
+        'ERROR': stats.value.errorBook
+      }[type];
+
+      if (!count) {
+        proxy.$message.info('暂无内容');
+        return;
+      }
+
       currentType.value = type;
       listVisible.value = true;
     };
@@ -88,6 +103,11 @@ export default {
       }
     };
 
+    const handleClosed = () => {
+      listVisible.value = false;
+      fetchStats();
+    };
+
     onMounted(() => {
       fetchStats();
     });
@@ -97,7 +117,8 @@ export default {
       listVisible,
       currentType,
       openList,
-      fetchStats
+      fetchStats,
+      handleClosed
     };
   }
 };
@@ -130,7 +151,7 @@ export default {
 
 .card {
   width: calc(50% - 8px);
-  border-radius: 16px;
+  border-radius: 8px;
   
   &.is-error { 
     background: #e0fedd; 
@@ -191,5 +212,20 @@ export default {
   background-position: center center;
   background-size: contain;
   margin: 8px 0;
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.slide-left-enter-from,
+.slide-left-leave-to {
+  transform: translateX(100%);
+}
+
+.slide-left-enter-to,
+.slide-left-leave-from {
+  transform: translateX(0);
 }
 </style>
