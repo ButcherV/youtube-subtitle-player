@@ -14,9 +14,9 @@
               @blur="handleBlur"
             >{{ currentSubtitle }}</p>
             <div class="button-group">
-              <button class="icon-button">
+              <!-- <button class="icon-button">
                 <font-awesome-icon icon="plus" />
-              </button>
+              </button> -->
               <button 
                 class="icon-button" 
                 @click="handleAnalyzeGrammar"
@@ -417,7 +417,8 @@ export default {
 
 .button-group {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
+  gap: 24px;
   margin-top: 24px;
   width: 80%;
   margin: 24px auto 0 auto;
