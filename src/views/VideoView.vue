@@ -25,9 +25,15 @@
           class="info-card-input"
           v-model="userInputUrl"
           placeholder="输入 YouTube 视频链接"
+          :disabled="isChecking"
         />
-        <button class="info-card-add-button" @click="addVideoToHistory(userInputUrl)">
-          <font-awesome-icon icon="plus" />
+        <button 
+          class="info-card-add-button" 
+          @click="addVideoToHistory(userInputUrl)"
+          :disabled="isChecking"
+        >
+          <font-awesome-icon v-if="!isChecking" icon="plus" />
+          <font-awesome-icon v-else icon="spinner" class="fa-spin" />
         </button>
       </div>
     </div>
@@ -59,7 +65,7 @@
 import { ref, inject, getCurrentInstance, computed, onMounted, watch } from "vue";
 import axios from "axios";
 import VideoPlayer from "../components/VideoPlayer.vue";
-import { extractVideoId } from "../utils/youtubeUtils";
+import { extractVideoId, normalizeYoutubeUrl } from "../utils/youtubeUtils";
 import VideoList from '@/components/VideoList.vue';
 import { SUCCESS_KEYS, ERROR_KEYS, getSuccessMessage, getErrorMessage } from '@/constants';
 
@@ -79,6 +85,7 @@ export default {
     const meta = ref({});
     const currentVideoId = ref("");
     const showVideoPlayer = ref(false);
+    const isChecking = ref(false);
     const auth = inject('auth');
     const { proxy } = getCurrentInstance();
 
@@ -93,19 +100,59 @@ export default {
       // },
     ]);
 
-    const addVideoToHistory = async (url) => {
+    // 前端基本检查
+    const checkVideoFrontend = (url) => {
+      // 登录检查
       if (!isLoggedIn.value) {
         auth.showAuthModal();
-        return;
+        return false;
       }
 
+      // 基础参数验证
+      if (!url?.trim()) {
+        proxy.$message.error("请输入视频链接");
+        return false;
+      }
+      // 提取并验证视频 ID
       const videoId = extractVideoId(url);
       if (!videoId) {
         proxy.$message.error("无效的 YouTube 链接");
-        return;
+        return false;
       }
 
-      // 先添加一个加载状态的项
+      // 检查是否重复
+      const isDuplicate = historyItems.value.some(item => item.id === videoId);
+      if (isDuplicate) {
+        proxy.$message.warning("该视频已经添加过了");
+        return false;
+      }
+
+      return videoId;
+    };
+
+    // 后端详细检查（除了是否是英语视频判断）
+    const checkVideoBackend = async (videoId, url) => {
+      try {
+        const response = await axios.post(`${API.BASE_URL}/video/check-video`, {
+          videoId,
+          url
+        });
+        
+        return {
+          success: true,
+          data: response.data.data
+        };
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || "视频检查失败";
+        proxy.$message.error(errorMessage);
+        return {
+          success: false
+        };
+      }
+    };
+
+    // 添加视频到列表
+    const addVideoToHistoryList = (videoId) => {
       historyItems.value.unshift({
         id: videoId,
         title: "",
@@ -113,37 +160,90 @@ export default {
         duration: 0,
         status: "loading"
       });
+    };
 
-      // 清空输入框
-      userInputUrl.value = "";
+    // 处理视频添加成功
+    const handleVideoSuccess = (videoId, data) => {
+      const { meta, subtitles } = data;
+      const index = historyItems.value.findIndex(item => item.id === videoId);
+      
+      if (index !== -1) {
+        historyItems.value[index] = {
+          id: videoId,
+          title: meta.videoTitle,
+          coverAddress: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+          duration: meta.videoDuration,
+          status: "ready"
+        };
+      }
+
+      localStorage.setItem(videoId, JSON.stringify({ meta, subtitles }));
+    };
+
+    // 处理视频添加失败
+    const handleVideoError = (videoId, error) => {
+      console.error("处理视频失败:", error);
+
+      // 无论任何报错（包括语言非英语、whisper 调用过程中的任何问题）都直接从列表中移除
+      historyItems.value = historyItems.value.filter(item => item.id !== videoId);
+      
+      const errorMessage = error.response?.data?.message || "处理视频失败，请重新尝试";
+      proxy.$message.error(errorMessage);
+      
+      // const index = historyItems.value.findIndex(item => item.id === videoId);
+      // if (index !== -1) {
+      //   // 如果是语言检查错误，直接从列表中移除
+      //   if (error.response?.data?.message?.includes('VIDEO_LANGUAGE_ERROR')) {
+      //     historyItems.value = historyItems.value.filter(item => item.id !== videoId);
+      //     // 显示具体的语言检查错误信息
+      //     proxy.$message.error(error.response.data.message);
+      //   } else {
+      //     // 其他错误则标记为错误状态
+      //     historyItems.value[index].status = "error";
+      //     const errorMessage = error.response?.data?.message || "处理视频失败，请稍后重试";
+      //     proxy.$message.error(errorMessage);
+      //   }
+      // }
+    };
+
+    // 主函数
+    const addVideoToHistory = async (url) => {
+      const normalizedUrl = normalizeYoutubeUrl(url);
+      // 前端基础检查
+      const videoId = checkVideoFrontend(normalizedUrl);
+      if (!videoId) {
+        userInputUrl.value = ""; // 清空输入框
+        return;
+      }
+
+      // 开始检查，设置加载状态
+      isChecking.value = true;
+      console.log("isChecking", isChecking.value);
 
       try {
-        const response = await axios.post(`${API.BASE_URL}/process-video`, { videoUrl: url });
-        if (response.data && response.data.meta) {
-          const { meta, subtitles } = response.data;
-        
-          // 更新历史记录中的项
-          const index = historyItems.value.findIndex(item => item.id === videoId);
-          if (index !== -1) {
-            historyItems.value[index] = {
-              id: videoId,
-              title: meta.videoTitle,
-              coverAddress: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-              duration: meta.videoDuration,
-              status: "ready"
-            };
-          }
+        // 后端详细检查（除了是否是英语视频判断）
+        const checkResult = await checkVideoBackend(videoId, normalizedUrl);
+        if (!checkResult.success) {
+          userInputUrl.value = ""; // 清空输入框
+          return;
+        }
 
-          // 存储完整数据到 localStorage
-          localStorage.setItem(videoId, JSON.stringify({ meta, subtitles }));
+        addVideoToHistoryList(videoId);
+        userInputUrl.value = ""; // 清空输入框
+        
+        const response = await axios.post(`${API.BASE_URL}/process-video`, { 
+          videoUrl: normalizedUrl,
+          videoId
+        });
+
+        if (response.data && response.data.meta) {
+          handleVideoSuccess(videoId, response.data);
         }
       } catch (error) {
-        console.error("处理视频失败:", error);
-        const index = historyItems.value.findIndex(item => item.id === videoId);
-        if (index !== -1) {
-          historyItems.value[index].status = "error";
-        }
-        proxy.$message.error("处理视频失败，请稍后重试");
+        handleVideoError(videoId, error);
+      } finally {
+        // 无论成功失败，都结束加载状态
+        isChecking.value = false;
       }
     };
 
@@ -250,6 +350,7 @@ export default {
       isLoggedIn,
       userProfile,
       addVideoToHistory,
+      isChecking,
       // isListView,
       // toggleListView,
     };
@@ -303,6 +404,11 @@ export default {
   border-radius: 8px 0 0 8px;
   background-color: $green;
   color: white;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 }
 
 .info-card-input::placeholder {
@@ -323,6 +429,11 @@ export default {
   align-items: center;
   justify-content: center;
   font-weight: 900;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 }
 
 /* 确保输入框和按钮紧密相连 */

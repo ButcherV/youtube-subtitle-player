@@ -40,4 +40,12 @@ export function generateEmbedUrl(videoId, options = {}) {
   return `https://www.youtube.com/embed/${videoId}?${params}`;
 }
 
+export function normalizeYoutubeUrl(url) {
+  const videoId = extractVideoId(url);
+  if (!videoId) {
+    throw new Error("无效的 YouTube 链接");
+  }
+  return `https://www.youtube.com/watch?v=${videoId}`;
+}
+
 

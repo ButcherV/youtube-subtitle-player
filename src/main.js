@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
   faArrowLeft,
   faPlus,
+  faSpinner,
   faChevronUp,
   faChevronDown,
   faRightFromBracket,
@@ -33,6 +34,7 @@ import 'element-plus/dist/index.css'
 library.add(
   faArrowLeft, 
   faPlus, 
+  faSpinner,
   faChevronUp, 
   faChevronDown,
   faRightFromBracket,
@@ -48,7 +50,7 @@ library.add(
   faEye,
   faChevronLeft,
   faChevronRight,
-  faMinus
+  faMinus,
 );
 
 const app = createApp(App);
