@@ -30,7 +30,7 @@
 import { ref, getCurrentInstance } from "vue";
 import LoginForm from "./LoginForm.vue";
 import RegisterForm from "./RegisterForm.vue";
-import { SUCCESS_KEYS, getSuccessMessage } from '@/constants/errorKeys';
+import { SUCCESS_KEYS, getSuccessMessage } from '@/constants';
 
 export default {
   name: "AuthModal",

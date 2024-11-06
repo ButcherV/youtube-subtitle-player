@@ -61,9 +61,9 @@ import axios from "axios";
 import VideoPlayer from "../components/VideoPlayer.vue";
 import { extractVideoId } from "../utils/youtubeUtils";
 import VideoList from '@/components/VideoList.vue';
-import { SUCCESS_KEYS, ERROR_KEYS, getSuccessMessage, getErrorMessage } from '@/constants/errorKeys';
+import { SUCCESS_KEYS, ERROR_KEYS, getSuccessMessage, getErrorMessage } from '@/constants';
 
-const API_BASE_URL = "http://192.168.128.153:3000";
+import { API } from '@/constants';
 
 export default {
   name: "VideoView",
@@ -118,7 +118,7 @@ export default {
       userInputUrl.value = "";
 
       try {
-        const response = await axios.post(`${API_BASE_URL}/process-video`, { videoUrl: url });
+        const response = await axios.post(`${API.BASE_URL}/process-video`, { videoUrl: url });
         if (response.data && response.data.meta) {
           const { meta, subtitles } = response.data;
         
@@ -149,7 +149,7 @@ export default {
 
     const fetchHistoryList = async () => {
       try {
-        const response = await axios.post(`${API_BASE_URL}/process-video`);
+        const response = await axios.post(`${API.BASE_URL}/process-video`);
         // 处理返回的完整数据
         historyItems.value = response.data.map(item => ({
           id: item.videoId,
@@ -193,7 +193,7 @@ export default {
 
     const handleLogout = async () => {
       try {
-        const response = await axios.post(`${API_BASE_URL}/auth/logout`);
+        const response = await axios.post(`${API.BASE_URL}/auth/logout`);
         if (response.data.success === SUCCESS_KEYS.LOGOUT_SUCCESS) {
           auth.logout();
           userProfile.value = {};
@@ -210,7 +210,7 @@ export default {
     const fetchUserProfile = async () => {
       if (isLoggedIn.value) {
         try {
-          const response = await axios.get(`${API_BASE_URL}/user/profile`);
+          const response = await axios.get(`${API.BASE_URL}/user/profile`);
           userProfile.value = response.data.user;
         } catch (error) {
           const errorMessage = error.response?.data?.error

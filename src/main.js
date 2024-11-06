@@ -18,7 +18,8 @@ import {
   faMagnifyingGlass,
   faEye,
   faChevronLeft,
-  faChevronRight
+  faChevronRight,
+  faMinus
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as faStarRegular } from "@fortawesome/free-regular-svg-icons";
 import router from "./router";
@@ -46,7 +47,8 @@ library.add(
   faStarRegular,
   faEye,
   faChevronLeft,
-  faChevronRight
+  faChevronRight,
+  faMinus
 );
 
 const app = createApp(App);

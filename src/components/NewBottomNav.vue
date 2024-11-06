@@ -106,7 +106,7 @@ const navigationOptions = [
 
 const activeOption = ref(
   navigationOptions.find((option) => option.route === route.path)?.name ||
-    "Video"
+    "video"  // 确保使用小写，与 navigationOptions 中的名称匹配
 );
 
 const handleClick = (option) => {
@@ -129,12 +129,15 @@ watch(
     )?.name;
     if (newActiveOption && newActiveOption !== activeOption.value) {
       if ((newPath === '/words' || newPath === '/settings') && !auth.checkAuth()) {
-        return; // 如果用户未登录，不更新 activeOption
+        return;
       }
       activeOption.value = newActiveOption;
-      document.body.style.background = navigationOptions.find(
+      const option = navigationOptions.find(
         (option) => option.name === newActiveOption
-      ).color;
+      );
+      if (option) {  // 添加防护
+        document.body.style.background = option.color;
+      }
     }
   }
 );
@@ -146,9 +149,12 @@ watch(
 // 非常奇葩的 bug。
 onMounted(() => {
   nextTick(() => {
-    document.body.style.background = navigationOptions.find(
+    const option = navigationOptions.find(
       (option) => option.name === activeOption.value
-    ).color;
+    );
+    if (option) {  // 添加防护
+      document.body.style.background = option.color;
+    }
   });
 });
 // onMounted(() => {

@@ -65,7 +65,7 @@ import Loading from './Loading.vue';
 import SentenceAnalysis from './template/SentenceAnalysis.vue'
 import PhraseAnalysis from './template/PhraseAnalysis.vue'
 import WordAnalysis from './template/WordAnalysis.vue' 
-const API_BASE_URL = "http://192.168.128.153:3000";
+import { API } from '@/constants';
 
 export default {
   name: "SubtitleAnalysisPopup",
@@ -187,7 +187,7 @@ export default {
       grammarAnalysis.value = null;
 
       try {
-        const response = await axios.post(`${API_BASE_URL}/grammar/analyze`, {
+        const response = await axios.post(`${API.BASE_URL}/grammar/analyze`, {
           text: textToAnalyze,
           context: {
             originText: props.subtitle.originText,
@@ -221,7 +221,7 @@ export default {
     // 使用 analyzingText 判断是否可以收藏
     // 因为 currentSelectedText 会因为失焦变为空，而 analyzingText 不会
     const canSave = computed(() => {
-      return grammarAnalysis.value 
+      return grammarAnalysis.value
         && analyzingText.value 
         && !isAnalyzing.value;
     });
@@ -246,7 +246,7 @@ export default {
           }
         };
 
-        const response = await axios.post(`${API_BASE_URL}/wordcard/save`, payload);
+        const response = await axios.post(`${API.BASE_URL}/wordcard/save`, payload);
         
         // 根据后端返回的消息显示提示
         if (response.data.success) {

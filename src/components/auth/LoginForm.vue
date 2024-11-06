@@ -12,9 +12,9 @@
 <script>
 import { ref, inject, getCurrentInstance } from "vue";
 import axios from 'axios';
-import { ERROR_KEYS, getErrorMessage, SUCCESS_KEYS, getSuccessMessage } from '@/constants/errorKeys';
+import { ERROR_KEYS, getErrorMessage, SUCCESS_KEYS, getSuccessMessage } from '@/constants';
 
-const API_BASE_URL = "http://192.168.128.153:3000";
+import { API } from '@/constants';
 
 export default {
   name: "LoginForm",
@@ -30,7 +30,7 @@ export default {
       error.value = "";
       isLoading.value = true;
       try {
-        const response = await axios.post(`${API_BASE_URL}/auth/login`, { 
+        const response = await axios.post(`${API.BASE_URL}/auth/login`, { 
           email: email.value, 
           password: password.value 
         });

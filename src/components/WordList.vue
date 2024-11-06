@@ -6,7 +6,7 @@
       </button>
       <div class="header-content">
         <h2 class="header-title">{{ title }} - Memory Builder</h2>
-        <div class="progress-container">
+        <div class="progress-container" v-if="wordList.length >= 1">
           <span class="progress-text">{{ currentIndex + 1 }} / {{ wordList.length }}</span>
           <div class="progress-bar">
             <div 
@@ -21,6 +21,11 @@
       <div v-if="loading" class="loading">
         <Loading />
       </div>
+      <template v-else-if="wordList.length === 0">
+        <div class="empty-state">
+          <p>恭喜你，复习结束！</p>
+        </div>
+      </template>
       <template v-else>
         <transition :name="transitionName" mode="out-in">
           <WordCard 
@@ -45,9 +50,11 @@
             <font-awesome-icon :icon="['fas', 'eye']" />
           </button>
           <button 
-            class="button plus-button" 
+            :class="['button', 'plus-button', { 'is-in-error': currentWord?.isInErrorBook }]" 
+            @click="toggleErrorBook"
+            :disabled="!currentWord"
           >
-            <font-awesome-icon icon="plus" />
+            <font-awesome-icon :icon="currentWord?.isInErrorBook ? 'minus' : 'plus'" />
           </button>
           <button 
             class="nav-button button"
@@ -63,12 +70,13 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, getCurrentInstance } from 'vue';
 import axios from 'axios';
 import Loading from './Loading.vue';
 import WordCard from './WordCard.vue';
+import confetti from 'canvas-confetti';
 
-const API_BASE_URL = "http://192.168.128.153:3000";
+import { API } from '@/constants';
 
 export default {
   name: 'WordList',
@@ -89,6 +97,59 @@ export default {
     const currentIndex = ref(0);
     const isExpanded = ref(false);
     const isReverse = ref(false);
+    const { proxy } = getCurrentInstance();
+
+    const triggerConfetti = () => {
+      // 在 word-list 内部创建 canvas
+      const canvas = document.createElement('canvas');
+      canvas.style.position = 'fixed';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      canvas.style.pointerEvents = 'none';
+      canvas.style.zIndex = '999999';
+    
+      // 将 canvas 添加到 word-list 内部
+      const wordList = document.querySelector('.word-list');
+      if (wordList) {
+        wordList.appendChild(canvas);
+      }
+
+      const myConfetti = confetti.create(canvas, {
+        resize: true,
+        useWorker: true
+      });
+
+      // 第一波烟花
+      myConfetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#7C3AED', '#10B981', '#3B82F6', '#F59E0B', '#EF4444']
+      });
+
+      // 延迟发射第二波
+      setTimeout(() => {
+        myConfetti({
+          particleCount: 50,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.6 }
+        });
+        myConfetti({
+          particleCount: 50,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.6 }
+        });
+      }, 1000);
+
+      // 清理 canvas
+      setTimeout(() => {
+        canvas.remove();
+      }, 2500);
+    };
     
     const toggleExpand = () => {
       isExpanded.value = !isExpanded.value;
@@ -132,7 +193,7 @@ export default {
         case 'WORD': return 'Words';
         case 'PHRASE': return 'Phrases';
         case 'SENTENCE': return 'Sentences';
-        case 'ERROR': return 'Error Book';
+        case 'ERROR': return 'REVIEW LIST';
         default: return '';
       }
     });
@@ -140,7 +201,7 @@ export default {
     const fetchWordList = async () => {
       loading.value = true;
       try {
-        let url = `${API_BASE_URL}/wordcard/list`;
+        let url = `${API.BASE_URL}/wordcard/list`;
         if (props.type === 'ERROR') {
           url += '?isInErrorBook=true';
         } else {
@@ -166,6 +227,43 @@ export default {
       emit('closed');
     };
 
+    const toggleErrorBook = async () => {
+      if (!currentWord.value) return;
+      
+      try {
+        const response = await axios.put(
+          `${API.BASE_URL}/wordcard/toggle-error-book/${currentWord.value._id}`
+        );
+        
+        if (response.data.success) {
+          const index = wordList.value.findIndex(
+            word => word._id === currentWord.value._id
+          );
+          proxy.$message.success(response.data.message);
+          if (index !== -1) {
+            wordList.value[index].isInErrorBook = !wordList.value[index].isInErrorBook;
+            
+            if (props.type === 'ERROR' && !wordList.value[index].isInErrorBook) {
+              wordList.value.splice(index, 1);
+              if (wordList.value.length === 0) {
+                proxy.$message.success('恭喜你完成所有复习！');
+                triggerConfetti();
+                // 等待烟花效果结束后关闭页面
+                setTimeout(() => {
+                  close();
+                }, 2500); // 与烟花动画时长保持一致
+              } else if (currentIndex.value >= wordList.value.length) {
+                currentIndex.value = Math.max(0, wordList.value.length - 1);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('切换错题本状态失败:', error);
+        proxy.$message.error('操作失败，请重试');
+      }
+    };
+
     return {
       title,
       close,
@@ -178,7 +276,8 @@ export default {
       progressPercentage,
       isExpanded,
       toggleExpand,
-      transitionName
+      transitionName,
+      toggleErrorBook
     };
   }
 };
@@ -261,7 +360,7 @@ export default {
 }
 
 .nav-button:disabled {
-  opacity: 0.5;
+  opacity: 0.2;
   cursor: not-allowed;
 }
 
@@ -350,5 +449,15 @@ export default {
 .slide-fade-reverse-leave-to {
   opacity: 0;
   transform: translateX(50px);
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: #adb5bd;
+  font-size: 24px;
+  text-align: center;
 }
 </style>

@@ -55,10 +55,10 @@
 <script>
 import { ref, onMounted, getCurrentInstance,computed, inject } from "vue";
 import axios from "axios";
-import { SUCCESS_KEYS, ERROR_KEYS, getSuccessMessage, getErrorMessage } from '@/constants/errorKeys';
+import { SUCCESS_KEYS, ERROR_KEYS, getSuccessMessage, getErrorMessage } from '@/constants';
 import VideoList from '@/components/VideoList.vue';
 
-const API_BASE_URL = "http://192.168.128.153:3000";
+import { API } from '@/constants';
 
 export default {
   name: "VideoView",
@@ -121,7 +121,7 @@ export default {
     const fetchUserProfile = async () => {
       if (isLoggedIn.value) {
         try {
-          const response = await axios.get(`${API_BASE_URL}/user/profile`);
+          const response = await axios.get(`${API.BASE_URL}/user/profile`);
           userProfile.value = response.data.user;
         } catch (error) {
           const errorMessage = error.response?.data?.error
@@ -132,7 +132,7 @@ export default {
 
     const handleLogout = async () => {
       try {
-        const response = await axios.post(`${API_BASE_URL}/auth/logout`);
+        const response = await axios.post(`${API.BASE_URL}/auth/logout`);
         if (response.data.success === SUCCESS_KEYS.LOGOUT_SUCCESS) {
           auth.logout();
           userProfile.value = {};

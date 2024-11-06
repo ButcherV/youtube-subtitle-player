@@ -57,7 +57,7 @@
 import { ref, onMounted, getCurrentInstance } from 'vue';
 import WordList from '../components/WordList.vue';
 import axios from 'axios';
-const API_BASE_URL = "http://192.168.128.153:3000";
+import { API } from '@/constants';
 
 export default {
   name: 'WordsView',
@@ -94,7 +94,7 @@ export default {
 
     const fetchStats = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/wordcard/stats`);
+        const response = await axios.get(`${API.BASE_URL}/wordcard/stats`);
         if (response.data.success) {
           stats.value = response.data.data;
         }

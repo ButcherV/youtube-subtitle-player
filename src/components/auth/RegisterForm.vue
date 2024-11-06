@@ -39,8 +39,8 @@
 <script>
 import { ref, getCurrentInstance, computed } from "vue";
 import axios from 'axios';
-import { ERROR_KEYS, getErrorMessage, SUCCESS_KEYS, getSuccessMessage } from '@/constants/errorKeys';
-const API_BASE_URL = "http://192.168.128.153:3000";
+import { ERROR_KEYS, getErrorMessage, SUCCESS_KEYS, getSuccessMessage } from '@/constants';
+import { API } from '@/constants';
 
 export default {
   name: "RegisterForm",
@@ -98,7 +98,7 @@ export default {
       isSubmitting.value = true;
       backendError.value = "";
       try {
-        await axios.post(`${API_BASE_URL}/auth/request-verification`, { email: email.value });
+        await axios.post(`${API.BASE_URL}/auth/request-verification`, { email: email.value });
         step.value = 2;
         proxy.$message.success(getSuccessMessage(SUCCESS_KEYS.VERIFICATION_CODE_SENT));
       } catch (error) {
@@ -123,7 +123,7 @@ export default {
       isSubmitting.value = true;
       backendError.value = "";
       try {
-        await axios.post(`${API_BASE_URL}/auth/register`, {
+        await axios.post(`${API.BASE_URL}/auth/register`, {
           email: email.value,
           username: username.value,
           password: password.value,
