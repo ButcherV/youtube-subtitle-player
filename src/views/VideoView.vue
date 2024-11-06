@@ -102,12 +102,6 @@ export default {
 
     // 前端基本检查
     const checkVideoFrontend = (url) => {
-      // 登录检查
-      if (!isLoggedIn.value) {
-        auth.showAuthModal();
-        return false;
-      }
-
       // 基础参数验证
       if (!url?.trim()) {
         proxy.$message.error("请输入视频链接");
@@ -208,6 +202,18 @@ export default {
 
     // 主函数
     const addVideoToHistory = async (url) => {
+      // 登录检查
+      if (!isLoggedIn.value) {
+        auth.showAuthModal();
+        return false;
+      }
+
+      // 已登录，但没输入 url
+      if (!url?.trim()) {
+        proxy.$message.error("请输入视频链接");
+        return false;
+      }
+
       const normalizedUrl = normalizeYoutubeUrl(url);
       // 前端基础检查
       const videoId = checkVideoFrontend(normalizedUrl);
