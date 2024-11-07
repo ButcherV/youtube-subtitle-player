@@ -62,9 +62,11 @@ export const auth = {
   setLoggedIn,
   logout,
 
-  handleLoginSuccess: (user, token) => {
+  handleLoginSuccess: (user, token, keepModalOpen = false) => {
     setLoggedIn(user, token);
-    isAuthModalVisible.value = false;
+    if (!keepModalOpen) {
+      isAuthModalVisible.value = false;
+    }
     if (routerInstance) routerInstance.push('/');
   },
 

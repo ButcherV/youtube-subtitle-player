@@ -1,37 +1,45 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="auth-form">
+  <form @submit.prevent="handleSubmit" class="auth-form" :class="{ 'auth-form-step-2': step === 2 }">
     <template v-if="step === 1">
-      <input 
-        v-model="email" 
-        type="email" 
-        placeholder="邮箱" 
-        required 
-        class="auth-input" 
-        @input="validateEmailOnInput"
-        @blur="validateEmailOnBlur"
-      />
-      <button 
-        type="submit" 
-        class="auth-button" 
-        :disabled="isSubmitting || !isEmailValidForSubmit"
-      >
-        {{ isSubmitting ? '发送中...' : '获取验证码' }}
-      </button>
-      <p v-if="emailError" class="error-message">{{ emailError }}</p>
-      <p v-if="backendError" class="error-message">{{ backendError }}</p>
+      <div>
+        <input 
+          v-model="email" 
+          type="email" 
+          placeholder="邮箱" 
+          required 
+          class="auth-input" 
+          @input="validateEmailOnInput"
+          @blur="validateEmailOnBlur"
+        />
+      </div>
+      <div>
+        <p v-if="emailError" class="error-message">{{ emailError }}</p>
+        <p v-if="backendError" class="error-message">{{ backendError }}</p>
+        <button 
+          type="submit" 
+          class="auth-button" 
+          :disabled="isSubmitting || !isEmailValidForSubmit"
+        >
+          {{ isSubmitting ? '发送中...' : '获取验证码' }}
+        </button>
+      </div>
     </template>
 
     <template v-else>
-      <div class="email-display">注册邮箱：{{ email }}</div>
-      <input v-model="username" type="text" placeholder="用户名" required class="auth-input" @input="validateUsername" @blur="validateUsername" />
-      <p v-if="usernameError" class="error-message">{{ usernameError }}</p>
-      <input v-model="verificationCode" type="text" placeholder="验证码" required class="auth-input" />
-      <input v-model="password" type="password" placeholder="密码" required class="auth-input" />
-      <input v-model="confirmPassword" type="password" placeholder="确认密码" required class="auth-input" />
-      <p v-if="backendError" class="error-message">{{ backendError }}</p>
-      <button type="submit" class="auth-button" :disabled="isSubmitting || !isUsernameValid">
-        {{ isSubmitting ? submittingText : submitText }}
-      </button>
+        <div>
+          <div class="email-display">注册邮箱：{{ email }}</div>
+          <input v-model="username" type="text" placeholder="用户名" required class="auth-input" @input="validateUsername" @blur="validateUsername" />
+          <input v-model="verificationCode" type="text" placeholder="验证码" required class="auth-input" />
+          <input v-model="password" type="password" placeholder="密码" required class="auth-input" />
+          <input v-model="confirmPassword" type="password" placeholder="确认密码" required class="auth-input" />
+        </div>
+        <div>
+          <p v-if="usernameError" class="error-message">{{ usernameError }}</p>
+          <p v-if="backendError" class="error-message">{{ backendError }}</p>
+          <button type="submit" class="auth-button" :disabled="isSubmitting || !isUsernameValid">
+            {{ isSubmitting ? submittingText : submitText }}
+          </button>
+        </div>
     </template>
   </form>
 </template>
@@ -159,39 +167,45 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  justify-content: space-between;
   width: 100%;
-  max-width: 300px;
+  height: 120px;
+
+  &.auth-form-step-2 {
+    height: 320px;
+  }
 }
 
 .auth-input {
-  padding: 10px;
+  padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 16px;
+  font-size: 14px;
+  width: 100%;
+
+  & + .auth-input {
+    margin-top: 8px;
+  }
 }
 
 .auth-button {
   padding: 10px;
-  background-color: #2196f3;
+  background-color: $green;
   color: white;
   border: none;
   border-radius: 4px;
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s;
-}
-
-.auth-button:hover:not(:disabled) {
-  background-color: #1976d2;
+  width: 100%;
 }
 
 .auth-button:disabled {
-  background-color: #cccccc;
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
@@ -201,11 +215,13 @@ export default {
   border-radius: 4px;
   font-size: 14px;
   color: #333;
+  margin-bottom: 8px;
 }
 
 .error-message {
   color: red;
   font-size: 14px;
-  margin-top: 5px;
+  margin-bottom: 8px;
+  text-align: center;
 }
 </style>
