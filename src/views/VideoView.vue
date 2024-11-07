@@ -405,11 +405,12 @@ export default {
 .info-card-input {
   flex-grow: 1;
   width: 300px;
-  padding: 10px;
+  padding: 0 8px;
   border: 4px solid white;
   border-radius: 8px 0 0 8px;
   background-color: $green;
   color: white;
+  font-size: 12px;
 
   &:disabled {
     opacity: 0.7;

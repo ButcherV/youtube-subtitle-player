@@ -171,3 +171,32 @@ button {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
+
+input {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;  // 移除默认背景
+  font: inherit;
+  color: inherit;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+// 移除 iOS 上的圆角和阴影
+input,
+button {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+// 移除自动填充时的背景色
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: inherit;
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
