@@ -86,8 +86,12 @@ export default {
     const closePlayer = () => {
       props.onClose();
     };
+
     // 解析字幕
-    const parsedSubtitles = computed(() => props.subtitles);
+    const parsedSubtitles = computed(() => {
+      console.log('parsedSubtitles computed running, subtitles:', props.subtitles);
+      return props.subtitles;
+    });
 
     const onPlayerReady = (playerInstance) => {
       console.log('Player ready:', playerInstance);

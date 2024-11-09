@@ -62,7 +62,7 @@
 </template>
 
 <script>
-import { ref, inject, getCurrentInstance, computed, onMounted, watch } from "vue";
+import { ref, inject, getCurrentInstance, computed, onMounted, onUnmounted, watch } from "vue";
 import axios from "axios";
 import VideoPlayer from "../components/VideoPlayer.vue";
 import { extractVideoId, normalizeYoutubeUrl } from "../utils/youtubeUtils";
@@ -124,6 +124,14 @@ export default {
       return videoId;
     };
 
+    // 检查是否需要轮询的函数
+    const checkAndStartPolling = (videoId, subtitles) => {
+      const hasUnTranslatedSubtitles = subtitles.some(sub => !sub.translatedText);
+      if (hasUnTranslatedSubtitles) {
+        pollVideoStatus(videoId);
+      }
+    };
+
     // 后端详细检查（除了是否是英语视频判断）
     const checkVideoBackend = async (videoId, url) => {
       try {
@@ -158,21 +166,89 @@ export default {
 
     // 处理视频添加成功
     const handleVideoSuccess = (videoId, data) => {
-      const { meta, subtitles } = data;
+      const { meta, subtitles, status } = data;
       const index = historyItems.value.findIndex(item => item.id === videoId);
       
       if (index !== -1) {
+        // 检查是否有已翻译的字幕
+        const hasTranslatedSubtitles = subtitles.some(sub => sub.translatedText);
+        
         historyItems.value[index] = {
           id: videoId,
           title: meta.videoTitle,
           coverAddress: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
           duration: meta.videoDuration,
-          status: "ready"
+          // 如果有已翻译的字幕，就显示 ready，否则保持 processing
+          status: hasTranslatedSubtitles ? 'ready' : 'processing'
         };
       }
 
-      localStorage.setItem(videoId, JSON.stringify({ meta, subtitles }));
+      localStorage.setItem(videoId, JSON.stringify({ meta, subtitles, status }));
     };
+
+    // 修改 pollVideoStatus 函数，将定时器存储到 Map 中
+    const pollIntervals = new Map();
+    const pollVideoStatus = async (videoId) => {
+      // 如果已经存在轮询，先清除
+      if (pollIntervals.has(videoId)) {
+        clearInterval(pollIntervals.get(videoId));
+      }
+
+      const pollInterval = setInterval(async () => {
+        try {
+          const response = await axios.post(`${API.BASE_URL}/process-video`, { videoId });
+          const { meta, subtitles: newSubtitles } = response.data;
+          const status = response.data.status || 'processing';
+          
+          // 更新本地存储
+          localStorage.setItem(videoId, JSON.stringify({ meta, newSubtitles, status }));
+
+          // 如果状态是完成或出错，停止轮询
+          if (status === 'completed' || status === 'error') {
+            clearInterval(pollInterval);
+            pollIntervals.delete(videoId);
+            return;
+          }
+              
+          // 检查是否有已翻译的字幕
+          const hasTranslatedSubtitles = newSubtitles.some(sub => sub.translatedText);
+          
+          // 更新列表项状态：如果有已翻译字幕，就保持 ready 状态
+          const index = historyItems.value.findIndex(item => item.id === videoId);
+          if (index !== -1) {
+            historyItems.value[index].status = hasTranslatedSubtitles ? 'ready' : 'processing';
+          }
+
+          console.log('Poll got new subtitles:', subtitles);
+      
+          if (currentVideoId.value === videoId) {
+            console.log('Updating subtitles.value');
+            // subtitles.value = subtitles;
+            subtitles.value = [...newSubtitles];
+          }
+
+          // 如果全部翻译完成或出错，停止轮询
+          if (status === 'completed' || status === 'error') {
+            clearInterval(pollInterval);
+            pollIntervals.delete(videoId);
+          }
+        } catch (error) {
+          console.error('轮询出错:', error);
+          clearInterval(pollInterval);
+          pollIntervals.delete(videoId);
+        }
+      }, 3000);
+
+      // 存储定时器
+      pollIntervals.set(videoId, pollInterval);
+    };
+
+    // 添加组件卸载时的清理函数
+    onUnmounted(() => {
+      // 清理所有轮询定时器
+      pollIntervals.forEach(interval => clearInterval(interval));
+      pollIntervals.clear();
+    });
 
     // 处理视频添加失败
     const handleVideoError = (videoId, error) => {
@@ -244,6 +320,10 @@ export default {
 
         if (response.data && response.data.meta) {
           handleVideoSuccess(videoId, response.data);
+          // 如果状态是 processing，开始轮询
+          if (response.data.status === 'processing') {
+            pollVideoStatus(videoId);
+          }
         }
       } catch (error) {
         handleVideoError(videoId, error);
@@ -257,20 +337,29 @@ export default {
       try {
         const response = await axios.post(`${API.BASE_URL}/process-video`);
         // 处理返回的完整数据
-        historyItems.value = response.data.map(item => ({
-          id: item.videoId,
-          title: item.data.meta.videoTitle,
-          coverAddress: `https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg`,
-          duration: item.data.meta.videoDuration,
-          status: "ready"
-        }));
-        // 同时将完整数据存入 localStorage
-        response.data.forEach(item => {
-          localStorage.setItem(item.videoId, JSON.stringify(item.data));
+        historyItems.value = response.data.map(item => {
+          // 保存完整数据到 localStorage
+          localStorage.setItem(item.videoId, JSON.stringify({
+            meta: item.data.meta,
+            subtitles: item.data.subtitles,
+            status: item.status || 'completed'  // 如果没有 status，默认为 completed
+          }));
+
+          // 返回列表项数据
+          return {
+            id: item.videoId,
+            title: item.data.meta.videoTitle,
+            coverAddress: `https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg`,
+            duration: item.data.meta.videoDuration,
+            status: 'ready'  // 历史数据都是已完成的
+          };
         });
+
+        // 不需要对历史数据启动轮询
       } catch (error) {
-        console.error("获取历史列表失败:", error);
-        proxy.$message.error("获取历史列表失败");
+        console.error('获取历史记录失败:', error);
+        const errorMessage = error.response?.data?.message || "获取历史记录失败";
+        proxy.$message.error(errorMessage);
       }
     };
 
@@ -337,8 +426,10 @@ export default {
       currentVideoId.value = item.id;
       currentVideoUrl.value = `https://www.youtube.com/watch?v=${item.id}`;
       meta.value = fullData.meta;
-      subtitles.value = fullData.subtitles;
+      subtitles.value = fullData.subtitles;  // 这里的 subtitles 可能部分翻译完成，部分未完成
       showVideoPlayer.value = true;
+
+      checkAndStartPolling(item.id, fullData.subtitles);
     };
 
     return {
@@ -357,6 +448,7 @@ export default {
       userProfile,
       addVideoToHistory,
       isChecking,
+      pollVideoStatus
       // isListView,
       // toggleListView,
     };

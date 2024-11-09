@@ -5,7 +5,7 @@
         <button class="close-btn" @click="$emit('close')">
           <font-awesome-icon :icon="['fas', 'xmark']" />
         </button>
-        <template v-if="showLanguageSelector">
+        <template v-if="!showLanguageSelector">
           <div class="tabs">
             <button
               :class="{ 'tab-button': true, 'is-active': activeTab === 'login' }"
@@ -26,7 +26,7 @@
           />
           <RegisterForm v-else @register-success="handleRegisterSuccess" />
         </template>
-        <template v-if="!showLanguageSelector">
+        <template v-if="showLanguageSelector">
           <h3 class="title">请选择语言偏好</h3>
           <LanguageSelector
             v-model="nativeLanguage"
